@@ -1,7 +1,4 @@
 {
-  "files.associations": {
-    "*.css": "tailwindcss"
-  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.foldingImportsByDefault": true,
   "editor.formatOnSave": true,

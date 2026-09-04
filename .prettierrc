@@ -2,7 +2,5 @@
   "semi": false,
   "singleQuote": true,
   "htmlWhitespaceSensitivity": "ignore",
-  "singleAttributePerLine": true,
-  "plugins": ["prettier-plugin-tailwindcss"],
-  "tailwindStylesheet": "./src/app/styles/app.css"
+  "singleAttributePerLine": true
 }

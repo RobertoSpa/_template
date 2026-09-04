@@ -1,10 +1,7 @@
 node_modules
 
 # Output
-.output
 .vercel
-.netlify
-.wrangler
 /dist
 
 # OS
