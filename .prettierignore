@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+graphify-out
+
+# Markdown follows the simple-english and technical-writing rules, and
+# prettier rewrites the sample payloads inside its fenced code blocks.
+*.md
+
+.impeccable
