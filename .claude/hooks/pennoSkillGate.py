@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PreToolUse hook: refuse a write to a test file until the testing skill loads.
+"""PreToolUse hook: refuse a write to a test file until the penno skill loads.
 
 The lint rules and the other hooks refuse an incorrect test. None of them
 teaches the shape of a correct one. This gate is the counterpart: it costs one
@@ -18,19 +18,19 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-LOG = Path.home() / ".local" / "state" / "script-logs" / "testing-skill-gate.log"
+LOG = Path.home() / ".local" / "state" / "script-logs" / "penno-skill-gate.log"
 LOG_LINES_MAX = 2000
 TRANSCRIPT_BYTES_MAX = 64 * 1024 * 1024
 
 TEST = re.compile(r"\.(?:test|spec)\.tsx?$|\.integration\.ts$")
 WRITE_TOOLS = ("Write", "Edit", "NotebookEdit")
-LOADED = re.compile(r'"skill"\s*:\s*"testing"')
+LOADED = re.compile(r'"skill"\s*:\s*"penno"')
 
-REASON = """Blocked: the testing skill is not loaded in this session.
+REASON = """Blocked: the penno skill is not loaded in this session.
 
-Call Skill(testing) now. Then write the test against its rules on Nullables,
-the four pillars, the public API, DAMP style, and the assertions that name the
-value that you want.
+Call Skill(penno) now. Then write the test against Penno's five axioms:
+behavior and not structure, infrastructure alone touches the world, a green
+test shows something, the failing test comes first, a test is read alone.
 
 This is a gate, not a formality. The identical call is blocked again."""
 

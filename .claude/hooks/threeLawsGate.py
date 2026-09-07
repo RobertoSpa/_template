@@ -28,7 +28,8 @@ TEST = re.compile(r"\.(?:test|spec)\.tsx?$|\.integration\.ts$")
 WRITE_TOOLS = ("Write", "Edit", "NotebookEdit")
 
 FAILED_RUN = re.compile(r"Tests\s+\d+ failed|\d+ failed \(\d+\)|FAIL\s+src/")
-WROTE_SOURCE = re.compile(r'"file_path"\s*:\s*"([^"]+)"')
+TOOL_USE = "tool_use"
+TOOL_USE_MARK = '"tool_use"'
 
 REASON = """Blocked: no test failed since the last write to src/.
 
@@ -36,7 +37,7 @@ Write the failing test first, run it, and let it fail for the reason that the
 new code will fix. Then write the code.
 
 Only sufficient test code to fail, then only sufficient production code to pass.
-See .claude/skills/testing/SKILL.md"""
+See .claude/skills/penno/SKILL.md"""
 
 
 def log(message: str) -> None:
@@ -61,8 +62,59 @@ def is_gated(file_path: str) -> bool:
     return SOURCE.search(file_path) is not None
 
 
+def write_block_path(block: object) -> str:
+    """The file_path of one write tool call in a transcript line, or "" for the rest."""
+    assert isinstance(WRITE_TOOLS, tuple)
+    assert len(WRITE_TOOLS) == 3
+
+    if not isinstance(block, dict):
+        return ""
+
+    if block.get("type") != TOOL_USE:
+        return ""
+
+    if block.get("name") not in WRITE_TOOLS:
+        return ""
+
+    arguments = block.get("input")
+
+    if not isinstance(arguments, dict):
+        return ""
+
+    return str(arguments.get("file_path", ""))
+
+
+def wrote_gated_source(line: str) -> bool:
+    """True when a write tool touched a gated src/ file on this transcript line.
+
+    A Read, a Grep, and a quoted path in a message all carry a file_path too.
+    Only a tool_use block named by WRITE_TOOLS counts as a write.
+    """
+    assert isinstance(line, str)
+    assert TOOL_USE_MARK == '"tool_use"'
+
+    if TOOL_USE_MARK not in line:
+        return False
+
+    try:
+        entry = json.loads(line)
+    except json.JSONDecodeError:
+        return False  # a truncated line proves nothing
+
+    content = entry.get("message", {}).get("content")
+
+    if not isinstance(content, list):
+        return False
+
+    return any(is_gated(write_block_path(block)) for block in content)
+
+
 def scan(path: Path) -> tuple[int, int]:
-    """Line number of the last gated write, and of the last failing test run."""
+    """Line number of the last gated write, and of the last failing test run.
+
+    ponytail: reads the whole transcript on every gated write. Read it backwards
+    and stop at the first hit if a long session gets slow.
+    """
     wrote_at = 0
     failed_at = 0
     read = 0
@@ -79,9 +131,7 @@ def scan(path: Path) -> tuple[int, int]:
             if FAILED_RUN.search(line):
                 failed_at = number
 
-            written = WROTE_SOURCE.search(line)
-
-            if written is not None and is_gated(written.group(1)):
+            if wrote_gated_source(line):
                 wrote_at = number
 
     assert wrote_at >= 0

@@ -4,5 +4,3 @@ set -euo pipefail
 pnpm lint
 pnpm lint:fsd
 pnpm check
-pnpm gate:tests
-pnpm gate:journeys

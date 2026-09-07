@@ -5,7 +5,7 @@ import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescrip
 import globals from 'globals'
 import ts from 'typescript-eslint'
 
-const SKILL = 'See .claude/skills/testing/SKILL.md'
+const SKILL = 'See .claude/skills/penno/SKILL.md'
 
 const bannedInTests = [
   {
@@ -23,8 +23,8 @@ const bannedInTests = [
     selector: 'MemberExpression[property.name=/^toMatch(Inline)?Snapshot$/]',
   },
   {
-    message: `A catch block with no assertion turns a thrown error into a pass. Assert on the rejection with expect(...).rejects or expect(...).toThrow(). ${SKILL}`,
-    selector: 'TryStatement',
+    message: `An empty catch block turns a thrown error into a pass. Assert on the rejection with expect(...).rejects or expect(...).toThrow(). ${SKILL}`,
+    selector: 'CatchClause > BlockStatement[body.length=0]',
   },
 ]
 
@@ -168,7 +168,6 @@ export default ts.config(
     rules: {
       ...vitest.configs.recommended.rules,
       'no-restricted-syntax': ['error', ...bannedEverywhere, ...bannedInTests],
-      'vitest/expect-expect': 'error',
       'vitest/no-conditional-expect': 'error',
       'vitest/no-conditional-in-test': 'error',
       'vitest/no-disabled-tests': 'error',

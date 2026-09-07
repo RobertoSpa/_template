@@ -7,7 +7,7 @@ const denyCall = (label: string) => {
 
   return () => {
     throw new Error(
-      `${label} ran in a unit test. A unit test must not touch the network. Build the dependency with createNull(). See .claude/skills/testing/SKILL.md`,
+      `${label} ran in a unit test. A unit test must not touch the network. Build the dependency with createNull(). See .claude/skills/penno/SKILL.md`,
     )
   }
 }
