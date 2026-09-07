@@ -5,7 +5,7 @@ const denyCall = (label: string) => {
 
   return () => {
     throw new Error(
-      `${label} ran in a component test. A component takes its API client from createNull(), and the test gives it the responses. See .claude/skills/testing/SKILL.md`,
+      `${label} ran in a component test. A component takes its API client from createNull(), and the test gives it the responses. See .claude/skills/penno/SKILL.md`,
     )
   }
 }

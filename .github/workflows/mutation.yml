@@ -2,8 +2,16 @@ name: Mutation
 
 on:
   pull_request:
+  workflow_dispatch:
   schedule:
     - cron: '0 5 * * 1'
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  INCREMENTAL_FILE: reports/mutation/incremental.json
 
 jobs:
   mutation:
@@ -17,6 +25,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Restore the incremental results of the last run
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.INCREMENTAL_FILE }}
+          key: stryker-${{ github.sha }}
+          restore-keys: stryker-
       - name: Run Stryker when src holds a module to mutate
         run: |
           mutable=$(git ls-files src | grep -E '\.tsx?$' \
@@ -25,4 +39,11 @@ jobs:
             echo 'src has no module to mutate yet'
             exit 0
           fi
-          pnpm test:mutation
+          rebuild=''
+          if [ "${{ github.event_name }}" != 'pull_request' ]; then
+            rebuild='--force'
+          fi
+          pnpm test:mutation \
+            --incremental \
+            --incrementalFile "$INCREMENTAL_FILE" \
+            $rebuild

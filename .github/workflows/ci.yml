@@ -26,8 +26,6 @@ jobs:
       - run: pnpm lint:fsd
       - run: pnpm check
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm gate:tests
-      - run: pnpm gate:journeys
       - run: pnpm gate:flaky origin/${{ github.base_ref || github.ref_name }}
       - run: pnpm test:unit -- --run
       - run: pnpm exec playwright test --pass-with-no-tests

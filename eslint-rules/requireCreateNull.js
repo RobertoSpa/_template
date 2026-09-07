@@ -75,7 +75,7 @@ export default {
     },
     messages: {
       missingFactory:
-        'This infrastructure module does not export {{missing}}. An infrastructure module exports create() for the real thing and createNull() for the test double. The stub of createNull() sits at the external client, and the rest of the module runs for real. See .claude/skills/testing/SKILL.md',
+        'This infrastructure module does not export {{missing}}. An infrastructure module exports create() for the real thing and createNull() for the test double. The stub of createNull() sits at the external client, and the rest of the module runs for real. See .claude/skills/penno/SKILL.md',
     },
     schema: [],
     type: 'problem',
