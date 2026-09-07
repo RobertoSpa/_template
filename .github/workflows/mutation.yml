@@ -19,7 +19,9 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - name: Run Stryker when src holds a module to mutate
         run: |
-          if [ -z "$(find src -name '*.ts' -not -name '*.test.ts' -not -name '*.spec.ts' -not -name '*.integration.ts' -o -name '*.tsx' -not -name '*.test.tsx' | head -1)" ]; then
+          mutable=$(git ls-files src | grep -E '\.tsx?$' \
+            | grep -vE '\.(test|spec)\.tsx?$|\.integration\.ts$|^src/app/main\.tsx$' || true)
+          if [ -z "$mutable" ]; then
             echo 'src has no module to mutate yet'
             exit 0
           fi
