@@ -16,8 +16,10 @@ export default defineConfig({
             instances: [{ browser: 'chromium', headless: true }],
             provider: playwright(),
           },
+          expect: { poll: { timeout: 1_000 } },
           include: ['src/**/*.{test,spec}.tsx'],
           name: 'client',
+          setupFiles: ['./vitest.setup.browser.ts'],
         },
       },
       {
@@ -26,6 +28,15 @@ export default defineConfig({
           environment: 'node',
           include: ['src/**/*.{test,spec}.ts', 'scripts/**/*.{test,spec}.ts'],
           name: 'server',
+          setupFiles: ['./vitest.setup.ts'],
+        },
+      },
+      {
+        extends: './vite.config.ts',
+        test: {
+          environment: 'node',
+          include: ['src/shared/infrastructure/**/*.integration.ts'],
+          name: 'integration',
         },
       },
     ],

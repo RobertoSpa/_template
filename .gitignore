@@ -26,3 +26,6 @@ graphify-out/
 # Impeccable keeps scratch state here. The design sidecar is a record and it stays.
 .impeccable/*
 !.impeccable/design.json
+
+.stryker-tmp/
+reports/
