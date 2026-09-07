@@ -1,0 +1,26 @@
+name: Mutation
+
+on:
+  pull_request:
+  schedule:
+    - cron: '0 5 * * 1'
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run Stryker when src holds a module to mutate
+        run: |
+          if [ -z "$(find src -name '*.ts' -not -name '*.test.ts' -not -name '*.spec.ts' -not -name '*.integration.ts' -o -name '*.tsx' -not -name '*.test.tsx' | head -1)" ]; then
+            echo 'src has no module to mutate yet'
+            exit 0
+          fi
+          pnpm test:mutation

@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "pnpm",
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "mutate": [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.{test,spec}.{ts,tsx}",
+    "!src/**/*.integration.ts",
+    "!src/app/main.tsx"
+  ],
+  "reporters": ["progress", "clear-text", "html"],
+  "coverageAnalysis": "perTest",
+  "ignoreStatic": true,
+  "tempDirName": ".stryker-tmp",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "timeoutMS": 15000,
+  "timeoutFactor": 2,
+  "thresholds": {
+    "break": 60,
+    "low": 70,
+    "high": 80
+  }
+}

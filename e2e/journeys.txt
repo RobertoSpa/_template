@@ -1,0 +1,2 @@
+# One line for each user journey that Playwright covers.
+# Each name needs a matching e2e/<name>.e2e.ts file.
