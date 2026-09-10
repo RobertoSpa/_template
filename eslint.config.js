@@ -88,11 +88,19 @@ export default ts.config(
         { blankLine: 'any', next: '*', prev: 'let' },
       ],
       '@stylistic/semi': ['error', 'never'],
+      'import/no-deprecated': 'error',
       'prettier/prettier': [
         'error',
         { ...prettierOptions, semi: false },
         { usePrettierrc: false },
       ],
+    },
+  },
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-deprecated': 'error',
+      'import/no-deprecated': 'off',
     },
   },
   {
