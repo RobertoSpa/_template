@@ -116,6 +116,16 @@ export default ts.config(
   },
   {
     files: ['**/*.{js,cjs,mjs,ts,tsx}'],
+    ignores: ['**/*.{test,spec,e2e}.{ts,tsx}'],
+    rules: {
+      'max-lines': [
+        'error',
+        { max: 300, skipBlankLines: true, skipComments: true },
+      ],
+    },
+  },
+  {
+    files: ['**/*.{js,cjs,mjs,ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
