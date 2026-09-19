@@ -8,7 +8,7 @@ This file says how the engineering skills read the domain documentation of this 
 - `CONTEXT-MAP.md` at the repo root, if it exists. It points at one `CONTEXT.md` for each context. Read each one that is related to the topic.
 - `docs/adr/`. Read each ADR that touches the area of the task. In a repo with more than one context, also read `src/<context>/docs/adr/`.
 
-If one of these files does not exist, continue with no message. Do not report the absence, and do not propose the file. The `/domain-modeling` skill makes the file when a term or a decision is resolved.
+If one of these files does not exist, continue with no message. Do not report the absence, and do not propose the file. The `/domain-modeling` skill makes the file when a term or a decision is resolved. The skills `/grill-with-docs` and `/improve-codebase-architecture` start it.
 
 ## File structure
 
