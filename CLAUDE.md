@@ -79,15 +79,31 @@ after the last write to `src/`.
 The git hooks are in `.githooks/`. The `prepare` script of `package.json`
 points git at that directory.
 
-## After the first feature
+## Agent skills
 
-Code or a domain is necessary for these steps. Do them in this sequence.
+### Issue tracker
 
-1. When the domain has a name, do the Pocock setup.
-2. When the first feature has code, do the `graphify` setup.
-3. When the first screen renders, do the `impeccable` setup.
-4. When the folder `apps/api` exists, add `dependency-cruiser` with the Clean Architecture layers.
-5. When the first module in `src/` has logic, run `pnpm test:mutation`. Then increase the Stryker floor in `stryker.config.json` from 60 to the score that this project holds. The `Mutation` workflow runs on each pull request with `--incremental`, and each Monday with `--force`.
-6. When the first module in `src/shared/infrastructure/` exists, make sure that the `Integration` workflow starts on the pull request. No pull request started this workflow.
+Issues live in the GitHub Issues of this repo, through the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
-Note: `pnpm test:mutation` stops with an error while `src/` has no module to mutate. The CI job finds this condition and does not run Stryker.
+### Triage labels
+
+The five default labels, each label string equal to its role name. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. The `domain-modeling` skill writes the two when the project has a domain. See `docs/agents/domain.md`.
+
+The skill `setup-matt-pocock-skills` wrote this block and the three files. A new project keeps them and runs that skill no more.
+
+<important if="a step in the setup list of README.md has no check">
+
+`README.md` holds the setup list of this project. Each step is a checkbox, and
+that checkbox is the record of the step. This file holds no copy of the list.
+
+A step with no check has a condition. Read the condition and test it against
+the repo. If the condition is true, do the step, or make an issue for it.
+Then write the check. If the condition is false, keep the step with no check.
+
+A `SessionStart` hook runs `.claude/hooks/setupChecklist.py` and prints each
+step that applies at this time.
+</important>
