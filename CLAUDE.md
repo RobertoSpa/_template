@@ -91,9 +91,7 @@ The five default labels, each label string equal to its role name. See `docs/age
 
 ### Domain docs
 
-Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. The `domain-modeling` skill writes the two when the project has a domain. See `docs/agents/domain.md`.
-
-The skill `setup-matt-pocock-skills` wrote this block and the three files. A new project keeps them and runs that skill no more.
+Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
 <important if="a step in the setup list of README.md has no check">
 
