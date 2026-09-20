@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG="$HOME/.local/state/script-logs/pre-push.log"
+LOG_LINES_MAX=2000
+COMMITS_MAX=200
+ZERO=0000000000000000000000000000000000000000
+
+log() {
+  mkdir -p "$(dirname "$LOG")"
+  printf '%s %s\n' "$(date -Is)" "$*" >>"$LOG"
+  tail -n "$LOG_LINES_MAX" "$LOG" >"$LOG.tmp" && mv "$LOG.tmp" "$LOG"
+}
+
+fail() {
+  echo "pre-push: $*" >&2
+  log "ERROR $*"
+  exit 1
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$local_sha" = "$ZERO" ]; then
+    continue
+  fi
+  if [ "$remote_ref" = refs/heads/main ]; then
+    fail 'REPO-01: no push goes to main. Open a pull request from a branch.'
+  fi
+  if [ "$remote_sha" = "$ZERO" ]; then
+    range="origin/main..$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+  for sha in $(git rev-list --max-count="$COMMITS_MAX" "$range"); do
+    if ! git verify-commit "$sha" >/dev/null 2>&1; then
+      fail "REPO-03: commit $sha is not signed. Do the signing step of the setup list in README.md."
+    fi
+  done
+  changed=$(git diff --name-only "origin/main...$local_sha")
+  modified=$(git diff --diff-filter=M --name-only "origin/main...$local_sha")
+  if grep -qx security/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
+    fail 'SOT-04: a change to security/policy.yaml is its own pull request. Move the other files to a second branch.'
+  fi
+done
+
+if ! mise exec -- pnpm security; then
+  fail 'HPT-05: a gate is no-go. Read the lines above.'
+fi
+
+log "OK $(git rev-parse --abbrev-ref HEAD)"

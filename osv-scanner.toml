@@ -1,0 +1,8 @@
+# The one file that accepts a vulnerability. Rule VULN-03 in docs/agents/security.md.
+# Each IgnoredVulns entry: id, ignoreUntil (a date), reason that starts with S1, S2, S3, or S4.
+
+[[PackageOverrides]]
+name = "@graphql-tools/executor-http"
+ecosystem = "npm"
+license.override = ["MIT"]
+reason = "osv-scanner reads no license for this package, and its package.json says MIT"

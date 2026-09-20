@@ -1,19 +1,21 @@
-name: CI
+name: Security
 
 on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 6 * * 1'
 
 permissions: {}
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: security-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  checks:
-    name: Lint, type check, and tests
+  security:
+    name: Security gates
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,30 +24,30 @@ jobs:
         with:
           egress-policy: block
           allowed-endpoints: >
+            api.deps.dev:443
             api.github.com:443
+            api.osv.dev:443
             cdn.playwright.dev:443
             github.com:443
+            mise.jdx.dev:443
+            mise-versions.jdx.dev:443
             nodejs.org:443
             objects.githubusercontent.com:443
             playwright.download.prss.microsoft.com:443
+            raw.githubusercontent.com:443
             registry.npmjs.org:443
             release-assets.githubusercontent.com:443
             storage.googleapis.com:443
+            tuf-repo-cdn.sigstore.dev:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.1.0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm lint:fsd
-      - run: pnpm check
-      - run: pnpm gate:flaky "origin/$BASE"
-        env:
-          BASE: ${{ github.base_ref || github.ref_name }}
-      - run: pnpm test:unit -- --run
-      - run: pnpm exec playwright test --pass-with-no-tests
+      - run: pnpm security

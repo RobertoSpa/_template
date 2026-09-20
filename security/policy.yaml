@@ -1,0 +1,152 @@
+# Source of truth of the security pipeline. The rules are in docs/agents/security.md.
+version: 1
+
+gates:
+  - policy
+  - deps
+  - secrets
+  - actions
+  - code
+
+deviation:
+  file: security/deviations.yaml
+  max_days: 30
+
+repository:
+  checks_before_merge:
+    - checks
+    - security
+  binary_extensions:
+    - png
+    - jpg
+    - jpeg
+    - gif
+    - webp
+    - ico
+    - woff
+    - woff2
+    - ttf
+    - otf
+    - pdf
+    - zip
+    - gz
+    - tar
+    - wasm
+    - exe
+    - dll
+    - so
+    - bin
+  binary_allowlist: []
+
+dependency:
+  records: security/dependencies.yaml
+  min_lines_replaced: 200
+  minimum_release_age_days: 7
+  allow_builds:
+    - esbuild
+    - unrs-resolver
+  trust_policy_exclude:
+    - chokidar
+    - eslint-import-resolver-typescript
+    - semver
+  registries_allowed:
+    - https://registry.npmjs.org
+  licenses_allowed:
+    - 0BSD
+    - Apache-2.0
+    - BSD-2-Clause
+    - BSD-3-Clause
+    - BlueOak-1.0.0
+    - CC-BY-3.0
+    - CC-BY-4.0
+    - CC0-1.0
+    - ISC
+    - MIT
+    - MPL-2.0
+    - Python-2.0
+    - Unlicense
+    - WTFPL
+  max_unmaintained_days: 365
+  scorecard_min: 5
+  pin_exact: true
+
+vulnerability:
+  accept_file: osv-scanner.toml
+  severities:
+    - S1
+    - S2
+    - S3
+    - S4
+  deadline_days:
+    S1: 1
+    S2: 3
+    S3: 10
+    S4: 30
+
+actions:
+  pin: sha
+  permissions_default: {}
+  zizmor_persona: pedantic
+  owners_allowed:
+    - actions
+    - github
+    - jdx
+    - pnpm
+    - step-security
+    - suzuki-shunsuke
+    - zizmorcore
+  egress_allowed:
+    - api.deps.dev:443
+    - api.github.com:443
+    - api.osv.dev:443
+    - cdn.playwright.dev:443
+    - codeload.github.com:443
+    - github.com:443
+    - mise.jdx.dev:443
+    - mise-versions.jdx.dev:443
+    - nodejs.org:443
+    - objects.githubusercontent.com:443
+    - playwright.download.prss.microsoft.com:443
+    - raw.githubusercontent.com:443
+    - registry.npmjs.org:443
+    - release-assets.githubusercontent.com:443
+    - storage.googleapis.com:443
+    - tuf-repo-cdn.sigstore.dev:443
+
+schedule:
+  weekly_day: monday
+  weekly_time_utc: '06:00'
+
+secrets:
+  filename_patterns:
+    - '.env'
+    - '.env.local'
+    - '.env.*.local'
+    - '*.pem'
+    - '*.key'
+    - '*.p12'
+    - '*.pfx'
+    - '*.keystore'
+    - 'id_rsa*'
+    - 'id_ed25519*'
+
+release:
+  sbom_format: cyclonedx
+  bake_minutes: 15
+
+change:
+  revert_hours: 24
+
+incident:
+  postmortems: docs/postmortems
+  postmortem_days: 3
+  never_events:
+    - a secret in a commit, a log, or a chat message
+    - a merge with no "merge" instruction from the user in the same turn
+    - a merge with a failed or incomplete check
+    - a push to main
+    - an action on main that is not pinned to a SHA
+    - a dependency with no record in security/dependencies.yaml
+    - a change to security/policy.yaml in a pull request with other files
+    - a deviation record for a mandatory rule
+    - a deploy that skips the bake time
