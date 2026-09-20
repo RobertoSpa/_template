@@ -93,6 +93,10 @@ The five default labels, each label string equal to its role name. See `docs/age
 
 Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
+### Security pipeline
+
+The rules are in `docs/agents/security.md`. The numbers are in `security/policy.yaml`. Read the rules before a dependency, a workflow, a secret, a release, or a merge. Write the sign-in of that file in the first message of each task. Run `pnpm security` before each merge.
+
 <important if="a step in the setup list of README.md has no check">
 
 `README.md` holds the setup list of this project. Each step is a checkbox, and

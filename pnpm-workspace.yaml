@@ -1,3 +1,14 @@
 allowBuilds:
   esbuild: true
   unrs-resolver: true
+blockExoticSubdeps: true
+minimumReleaseAge: 10080
+overrides:
+  deepmerge-ts: '>=8.0.2'
+  qs: '>=6.16.0'
+strictDepBuilds: true
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - chokidar
+  - eslint-import-resolver-typescript
+  - semver

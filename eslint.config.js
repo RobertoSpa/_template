@@ -2,10 +2,44 @@ import requireCreateNull from './eslint-rules/requireCreateNull.js'
 import vitest from '@vitest/eslint-plugin'
 import auto from 'eslint-config-canonical/auto'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
+import noUnsanitized from 'eslint-plugin-no-unsanitized'
+import security from 'eslint-plugin-security'
 import globals from 'globals'
 import ts from 'typescript-eslint'
 
 const SKILL = 'See .claude/skills/penno/SKILL.md'
+const SECURITY = 'See docs/agents/security.md'
+
+const parseSinks = [
+  {
+    message: `Input is parsed in one place. Move this call to src/shared/parse/ and return a typed value. Rule CODE-01. ${SECURITY}`,
+    selector:
+      'CallExpression[callee.object.name="JSON"][callee.property.name="parse"]',
+  },
+  {
+    message: `Input is parsed in one place. Move this call to src/shared/parse/ and return a typed value. Rule CODE-01. ${SECURITY}`,
+    selector: 'NewExpression[callee.name="URLSearchParams"]',
+  },
+  {
+    message: `A response is parsed in one place. Move this call to src/shared/parse/ and return a typed value. Rule CODE-01. ${SECURITY}`,
+    selector:
+      'CallExpression[callee.property.name=/^(json|text|formData)$/][callee.object.type!="Identifier"]',
+  },
+]
+
+const htmlSinks = [
+  {
+    message: `dangerouslySetInnerHTML takes only the value of the sanitize function in src/shared/sanitize/. Rule CODE-03. ${SECURITY}`,
+    selector: 'JSXAttribute[name.name="dangerouslySetInnerHTML"]',
+  },
+]
+
+const typeHoles = [
+  {
+    message: `unknown is a hole in the type proof. Parse the value into a named type. Rule CODE-05. ${SECURITY}`,
+    selector: 'TSUnknownKeyword',
+  },
+]
 
 const bannedInTests = [
   {
@@ -104,11 +138,50 @@ export default ts.config(
     },
   },
   {
+    files: ['**/*.{js,cjs,mjs,ts,tsx}'],
+    plugins: { 'no-unsanitized': noUnsanitized, security },
+    rules: {
+      ...security.configs.recommended.rules,
+      'no-unsanitized/method': 'error',
+      'no-unsanitized/property': 'error',
+      'security/detect-object-injection': 'off',
+    },
+  },
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        { 'ts-expect-error': true, 'ts-ignore': true, 'ts-nocheck': true },
+      ],
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+    },
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/shared/parse/**', 'src/shared/sanitize/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...bannedEverywhere,
+        ...parseSinks,
+        ...htmlSinks,
+        ...typeHoles,
+      ],
+    },
+  },
+  {
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
   {
     files: ['scripts/**'],
-    rules: { 'no-console': 'off' },
+    rules: {
+      'no-console': 'off',
+      'no-template-curly-in-string': 'off',
+      'security/detect-non-literal-fs-filename': 'off',
+      'security/detect-non-literal-regexp': 'off',
+    },
   },
   {
     files: ['**/*.e2e.ts'],

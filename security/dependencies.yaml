@@ -1,0 +1,102 @@
+# One record per dependency. Rule DEP-01 in docs/agents/security.md.
+- name: react
+  cause: the UI library of the template
+  without: a DOM diffing library with hooks
+  lines: 20000
+  since: 2026-09-20
+- name: react-dom
+  cause: the DOM renderer of react
+  without: the same as react
+  lines: 20000
+  since: 2026-09-20
+- name: '@feature-sliced/steiger-plugin'
+  cause: the FSD rules for steiger
+  since: 2026-09-20
+- name: '@playwright/test'
+  cause: the end-to-end test runner
+  since: 2026-09-20
+- name: '@stryker-mutator/core'
+  cause: the mutation test runner
+  since: 2026-09-20
+- name: '@stryker-mutator/vitest-runner'
+  cause: runs the vitest suite inside stryker
+  since: 2026-09-20
+- name: '@types/node'
+  cause: the types of the node API for scripts
+  since: 2026-09-20
+- name: '@types/react'
+  cause: the types of react
+  since: 2026-09-20
+- name: '@types/react-dom'
+  cause: the types of react-dom
+  since: 2026-09-20
+- name: '@vitejs/plugin-react'
+  cause: JSX and fast refresh in vite
+  since: 2026-09-20
+- name: '@vitest/browser-playwright'
+  cause: runs the client tests in a real browser
+  since: 2026-09-20
+- name: '@vitest/eslint-plugin'
+  cause: the vitest rules that penno names
+  since: 2026-09-20
+- name: eslint
+  cause: the linter
+  since: 2026-09-20
+- name: eslint-config-canonical
+  cause: the base rule set of the linter
+  since: 2026-09-20
+- name: eslint-import-resolver-typescript
+  cause: resolves TypeScript paths for the import rules
+  trust: version 3.10.1 was published with no provenance after an earlier one had one, and eslint-config-canonical pins ^3
+  since: 2026-09-20
+- name: eslint-plugin-no-unsanitized
+  cause: refuses innerHTML and the other DOM script sinks, rule CODE-02
+  since: 2026-09-20
+- name: eslint-plugin-security
+  cause: refuses eval, unsafe regex, and the node sinks, rule CODE-02
+  since: 2026-09-20
+- name: globals
+  cause: the global names for the linter
+  since: 2026-09-20
+- name: knip
+  cause: finds unused dependencies, exports, and files, rule DEP-14
+  since: 2026-09-20
+- name: playwright
+  cause: drives chromium for pnpm shot
+  since: 2026-09-20
+- name: prettier
+  cause: the formatter
+  since: 2026-09-20
+- name: smol-toml
+  cause: reads osv-scanner.toml in the policy gate
+  since: 2026-09-20
+- name: steiger
+  cause: the FSD linter
+  since: 2026-09-20
+- name: typescript
+  cause: the type checker
+  since: 2026-09-20
+- name: typescript-eslint
+  cause: the TypeScript rules of the linter
+  since: 2026-09-20
+- name: vite
+  cause: the dev server and the bundler
+  since: 2026-09-20
+- name: vitest
+  cause: the unit test runner
+  since: 2026-09-20
+- name: yaml
+  cause: reads the policy, the workspace file, and dependabot.yml in the policy gate
+  since: 2026-09-20
+- name: chokidar
+  trust: version 4.0.3 was published with no provenance after 4.0.2 had one, and steiger pins ^4
+  since: 2026-09-20
+- name: semver
+  trust: version 6.3.1 was published with no provenance after an earlier one had one, and babel pins ^6
+  since: 2026-09-20
+- name: esbuild
+  build: compiles vite and vitest code, and the postinstall selects the platform binary
+  since: 2026-09-20
+- name: unrs-resolver
+  build: resolves imports for eslint-import-resolver-typescript, and the postinstall selects the platform binary
+  since: 2026-09-20
