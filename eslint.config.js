@@ -159,19 +159,6 @@ export default ts.config(
     },
   },
   {
-    files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/shared/parse/**', 'src/shared/sanitize/**'],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        ...bannedEverywhere,
-        ...parseSinks,
-        ...htmlSinks,
-        ...typeHoles,
-      ],
-    },
-  },
-  {
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
   {
@@ -232,6 +219,23 @@ export default ts.config(
       ],
       'no-restricted-properties': ['error', ...bannedProperties],
       'no-restricted-syntax': ['error', ...bannedEverywhere],
+    },
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: [
+      'src/shared/parse/**',
+      'src/shared/sanitize/**',
+      '**/*.{test,spec,e2e}.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...bannedEverywhere,
+        ...parseSinks,
+        ...htmlSinks,
+        ...typeHoles,
+      ],
     },
   },
   {
