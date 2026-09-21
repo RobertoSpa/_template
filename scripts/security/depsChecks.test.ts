@@ -41,15 +41,18 @@ describe('recordProblems', () => {
     }
 
     expect(recordProblems(policy, json, records())).toStrictEqual([
-      'knip has no record in security/dependencies.yaml',
+      'knip has no record in security/dependencies.yaml. Rule DEP-01.',
     ])
   })
 
   it.each([
-    [{ lines: 50 }, 'react replaces 50 lines, policy wants 200 or more'],
-    [{ lines: undefined }, 'react record has no lines'],
-    [{ without: undefined }, 'react record has no without'],
-    [{ cause: undefined }, 'react record has no cause'],
+    [
+      { lines: 50 },
+      'react replaces 50 lines, policy wants 200 or more. Rule DEP-02.',
+    ],
+    [{ lines: undefined }, 'react record has no lines. Rule DEP-01.'],
+    [{ without: undefined }, 'react record has no without. Rule DEP-01.'],
+    [{ cause: undefined }, 'react record has no cause. Rule DEP-01.'],
   ])('refuses a runtime dependency record with %o', (change, problem) => {
     const changed = records().map((record) =>
       record.name === 'react' ? { ...record, ...change } : record,

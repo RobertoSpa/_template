@@ -29,7 +29,9 @@ export const secretFileProblems = (
     const hit = matchers.find(({ regExp }) => regExp.test(base))
 
     if (hit !== undefined) {
-      problems.push(`${path} matches the secret pattern ${hit.pattern}`)
+      problems.push(
+        `${path} matches the secret pattern ${hit.pattern}. Rule SEC-03.`,
+      )
     }
   }
 

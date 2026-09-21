@@ -1,10 +1,9 @@
+import { parseRules, type Rule } from '../rules.ts'
 import {
   ambiguousWordProblems,
   type Deviation,
   deviationProblems,
-  parseRules,
   type Policy,
-  type Rule,
   ruleShapeProblems,
   traceabilityProblems,
 } from './policyChecks.ts'
@@ -31,7 +30,9 @@ const recordFilesProblems = (policy: Policy): string[] => {
 
   for (const path of paths) {
     if (!exists(path)) {
-      problems.push(`the policy names ${path} and the file is missing.`)
+      problems.push(
+        `the policy names ${path} and the file is missing. Rule SOT-01.`,
+      )
     }
   }
 

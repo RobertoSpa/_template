@@ -29,7 +29,7 @@ const patternShapeProblems = (file: PatternFile): string[] => {
     }
 
     if ((pattern.source ?? '').length === 0) {
-      problems.push(`the pattern ${name} has no source.`)
+      problems.push(`the pattern ${name} has no source. Rule KEY-03.`)
     }
   }
 
@@ -50,7 +50,7 @@ const chosenModelProblems = (
 
     if (pattern === undefined) {
       problems.push(
-        `patterns.dual_model names ${name}, and the pattern file has no such pattern.`,
+        `patterns.dual_model names ${name}, and the pattern file has no such pattern. Rule CON-06.`,
       )
       continue
     }

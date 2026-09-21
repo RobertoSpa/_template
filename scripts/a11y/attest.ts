@@ -1,3 +1,4 @@
+import { parseRules } from '../rules.ts'
 import {
   type Attestation,
   attestationProblems,
@@ -5,7 +6,7 @@ import {
   routeClass,
   type RouteRecord,
 } from './attestChecks.ts'
-import { parseRules, type Policy } from './policyChecks.ts'
+import { type Policy } from './policyChecks.ts'
 import { exists, type Outcome, readText, readYaml, today } from './shared.ts'
 import assert from 'node:assert'
 

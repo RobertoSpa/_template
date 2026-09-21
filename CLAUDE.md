@@ -22,6 +22,8 @@ The folder `src/` obeys Feature-Sliced Design (FSD). The command `pnpm lint:fsd`
 | `pnpm test:integration` | Does the narrow tests against the real services. |
 | `pnpm test:mutation` | Does the Stryker mutation run. |
 | `pnpm gate:flaky` | Runs the changed tests 10 times, in a random sequence. |
+| `pnpm gates` | Runs the accessibility pipeline and then the security pipeline. |
+| `pnpm explain <RULE-ID>` | Prints the rule that has this identifier. |
 | `pnpm shot` | Screenshots the routes into `reports/shots/`. |
 | `pnpm format` | Writes the Prettier and ESLint corrections. |
 
@@ -95,7 +97,7 @@ Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/
 
 ### Security pipeline
 
-The rules are in `docs/agents/security.md`. The numbers are in `security/policy.yaml`. Read the rules before a dependency, a workflow, a secret, a release, or a merge. Write the sign-in of that file in the first message of each task. Run `pnpm security` before each merge.
+The rules are in `docs/agents/security.md`. The numbers are in `security/policy.yaml`. Each rule has a layer. A tool refuses each rule of the proven layer, and each no-go line names its rule. Read the rules of the attested layer before a dependency, a workflow, a secret, a release, or a merge. The command `grep attested docs/agents/security.md` lists them. To read one rule, run `pnpm explain <RULE-ID>`. Write the sign-in of that file in the first message of each task. Run `pnpm security` before each merge.
 
 <important if="a step in the setup list of README.md has no check">
 

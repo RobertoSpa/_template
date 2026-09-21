@@ -62,7 +62,6 @@ const DEVIATION_FIELDS = [
   'date',
   'expiry',
 ] as const
-const RULE_LINE = /^- \*\*([A-Z]+-\d+) \(([MRA])[^)]*\)\.\*\*/gmu
 const SEVERITY_PREFIX = /^(S[1-4]):/u
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u
 
@@ -78,27 +77,42 @@ const daysBetween = (from: string, to: string): number => {
   return days
 }
 
-const expected = <T>(name: string, actual: T, wanted: T): string[] => {
+const expected = <T>(
+  name: string,
+  actual: T,
+  wanted: T,
+  rule: string,
+): string[] => {
   assert(name.length > 0)
   assert(wanted !== undefined)
+  assert(rule.length > 0)
 
   return actual === wanted
     ? []
-    : [`${name} is ${actual}, policy wants ${wanted}`]
+    : [`${name} is ${actual}, policy wants ${wanted}. Rule ${rule}.`]
 }
 
-const notListed = (
-  name: string,
-  key: string,
-  have: string[],
-  allowed: string[],
-): string[] => {
-  assert(Array.isArray(have))
-  assert(Array.isArray(allowed))
+type ListCheck = {
+  allowed: string[]
+  have: string[]
+  key: string
+  name: string
+  rule: string
+}
 
-  return have
-    .filter((item) => !allowed.includes(item))
-    .map((item) => `${name} has ${item}, policy ${key} does not`)
+const notListed = (check: ListCheck): string[] => {
+  assert(Array.isArray(check.have))
+  assert(Array.isArray(check.allowed))
+  assert(check.rule.length > 0)
+
+  const extra = check.have.filter((item) => !check.allowed.includes(item))
+
+  assert(extra.length <= check.have.length)
+
+  return extra.map(
+    (item) =>
+      `${check.name} has ${item}, policy ${check.key} does not. Rule ${check.rule}.`,
+  )
 }
 
 export const workspaceProblems = (
@@ -110,22 +124,34 @@ export const workspaceProblems = (
 
   const minutes = policy.dependency.minimum_release_age_days * MINUTES_PER_DAY
   const problems = [
-    ...expected('minimumReleaseAge', workspace.minimumReleaseAge, minutes),
-    ...expected('strictDepBuilds', workspace.strictDepBuilds, true),
-    ...expected('blockExoticSubdeps', workspace.blockExoticSubdeps, true),
-    ...expected('trustPolicy', workspace.trustPolicy, 'no-downgrade'),
-    ...notListed(
-      'allowBuilds',
-      'dependency.allow_builds',
-      Object.keys(workspace.allowBuilds ?? {}),
-      policy.dependency.allow_builds,
+    ...expected(
+      'minimumReleaseAge',
+      workspace.minimumReleaseAge,
+      minutes,
+      'DEP-03',
     ),
-    ...notListed(
-      'trustPolicyExclude',
-      'dependency.trust_policy_exclude',
-      workspace.trustPolicyExclude ?? [],
-      policy.dependency.trust_policy_exclude,
+    ...expected('strictDepBuilds', workspace.strictDepBuilds, true, 'DEP-05'),
+    ...expected(
+      'blockExoticSubdeps',
+      workspace.blockExoticSubdeps,
+      true,
+      'DEP-06',
     ),
+    ...expected('trustPolicy', workspace.trustPolicy, 'no-downgrade', 'DEP-07'),
+    ...notListed({
+      allowed: policy.dependency.allow_builds,
+      have: Object.keys(workspace.allowBuilds ?? {}),
+      key: 'dependency.allow_builds',
+      name: 'allowBuilds',
+      rule: 'DEP-05',
+    }),
+    ...notListed({
+      allowed: policy.dependency.trust_policy_exclude,
+      have: workspace.trustPolicyExclude ?? [],
+      key: 'dependency.trust_policy_exclude',
+      name: 'trustPolicyExclude',
+      rule: 'DEP-07',
+    }),
   ]
 
   assert(problems.every((problem) => problem.length > 0))
@@ -150,11 +176,11 @@ export const dependabotProblems = (
 
     if (days === undefined) {
       problems.push(
-        `${name} cooldown is missing, policy wants ${wanted} or more`,
+        `${name} cooldown is missing, policy wants ${wanted} or more. Rule DEP-04.`,
       )
     } else if (days < wanted) {
       problems.push(
-        `${name} cooldown is ${days} days, policy wants ${wanted} or more`,
+        `${name} cooldown is ${days} days, policy wants ${wanted} or more. Rule DEP-04.`,
       )
     }
   }
@@ -162,24 +188,6 @@ export const dependabotProblems = (
   assert(problems.length <= dependabot.updates.length)
 
   return problems
-}
-
-export const categoriesOf = (markdown: string): Map<string, string> => {
-  assert(typeof markdown === 'string')
-
-  const categories = new Map<string, string>()
-
-  for (const match of markdown.matchAll(RULE_LINE)) {
-    const [, rule, category] = match
-
-    assert(rule !== undefined)
-    assert(category !== undefined)
-    categories.set(rule, category)
-  }
-
-  assert(categories.size <= markdown.length)
-
-  return categories
 }
 
 const deviationRuleProblems = (
@@ -192,7 +200,7 @@ const deviationRuleProblems = (
   const category = categories.get(rule)
 
   if (category === undefined) {
-    return [`${rule} is not a rule`]
+    return [`${rule} is not a rule. Rule DEV-01.`]
   }
 
   return category === 'M' ? [`${rule} is mandatory`] : []
@@ -208,7 +216,7 @@ const deviationDateProblems = (
   assert(ISO_DATE.test(date))
 
   if (daysBetween(today, expiry) < 0) {
-    return [`expired on ${expiry}`]
+    return [`expired on ${expiry}. Rule DEV-03.`]
   }
 
   const life = daysBetween(date, expiry)
@@ -228,7 +236,7 @@ const deviationRecordProblems = (
   const missing = DEVIATION_FIELDS.find((field) => !record[field])
 
   if (missing !== undefined) {
-    return [`${missing} is missing`]
+    return [`${missing} is missing. Rule DEV-01.`]
   }
 
   const { date, expiry, rule } = record
@@ -275,17 +283,17 @@ const acceptedEntryProblems = (
   const severity = SEVERITY_PREFIX.exec(entry.reason ?? '')?.[1]
 
   if (severity === undefined) {
-    return ['reason does not start with S1, S2, S3, or S4']
+    return ['reason does not start with S1, S2, S3, or S4. Rule VULN-04.']
   }
 
   if (entry.ignoreUntil === undefined) {
-    return ['ignoreUntil is missing']
+    return ['ignoreUntil is missing. Rule VULN-04.']
   }
 
   const remaining = daysBetween(today, entry.ignoreUntil)
 
   if (remaining < 0) {
-    return [`expired on ${entry.ignoreUntil}`]
+    return [`expired on ${entry.ignoreUntil}. Rule VULN-01.`]
   }
 
   const deadline = policy.vulnerability.deadline_days[severity]
@@ -294,7 +302,7 @@ const acceptedEntryProblems = (
 
   if (remaining > deadline) {
     return [
-      `expiry ${entry.ignoreUntil} is past the ${severity} deadline of ${deadline} days`,
+      `expiry ${entry.ignoreUntil} is past the ${severity} deadline of ${deadline} days. Rule VULN-01.`,
     ]
   }
 

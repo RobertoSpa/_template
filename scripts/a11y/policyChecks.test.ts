@@ -1,9 +1,9 @@
+import { parseRules } from '../rules.ts'
 import {
   ambiguousWordProblems,
   criteriaInScope,
   type Deviation,
   deviationProblems,
-  parseRules,
   ruleShapeProblems,
   traceabilityProblems,
 } from './policyChecks.ts'
@@ -74,7 +74,7 @@ describe('ruleShapeProblems', () => {
   })
 
   it('counts a rule line that does not parse', () => {
-    const broken = `${RULES_TEXT}\n- **KEY-99 (M, proven).** The shape is wrong.`
+    const broken = `${RULES_TEXT}\n- **KEY-99 the shape has no category.**`
     const problems = ruleShapeProblems(broken, parseRules(broken), [
       'attested',
       'proven',

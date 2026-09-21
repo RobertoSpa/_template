@@ -32,20 +32,20 @@ const runtimeRecordProblems = (
   assert(policy.min_lines_replaced > 0)
 
   if (record.cause === undefined) {
-    return [`${record.name} record has no cause`]
+    return [`${record.name} record has no cause. Rule DEP-01.`]
   }
 
   if (record.without === undefined) {
-    return [`${record.name} record has no without`]
+    return [`${record.name} record has no without. Rule DEP-01.`]
   }
 
   if (record.lines === undefined) {
-    return [`${record.name} record has no lines`]
+    return [`${record.name} record has no lines. Rule DEP-01.`]
   }
 
   if (record.lines < policy.min_lines_replaced) {
     return [
-      `${record.name} replaces ${record.lines} lines, policy wants ${policy.min_lines_replaced} or more`,
+      `${record.name} replaces ${record.lines} lines, policy wants ${policy.min_lines_replaced} or more. Rule DEP-02.`,
     ]
   }
 
@@ -68,11 +68,11 @@ const dependencyProblems = (
     const record = byName.get(name)
 
     if (record === undefined) {
-      problems.push(`${name} has no record in ${RECORDS_FILE}`)
+      problems.push(`${name} has no record in ${RECORDS_FILE}. Rule DEP-01.`)
     } else if (runtime.includes(name)) {
       problems.push(...runtimeRecordProblems(policy, record))
     } else if (record.cause === undefined) {
-      problems.push(`${name} record has no cause`)
+      problems.push(`${name} record has no cause. Rule DEP-01.`)
     }
   }
 
