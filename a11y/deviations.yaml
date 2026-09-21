@@ -1,0 +1,13 @@
+# One record per deviation from a required rule. Rule DEV-01 in docs/agents/accessibility.md.
+#
+# A record has seven fields.
+#   rule: the identifier of the rule, such as KEY-03.
+#   place: the file, the component, or the route that the deviation covers.
+#   rationale: the cause. A deadline is not a cause.
+#   risk: the user that this deviation stops, and the task that the user loses.
+#   approver: the name of the user. The agent does not sign a record.
+#   date: the date of the approval, as YYYY-MM-DD.
+#   expiry: the last date that the record is live, as YYYY-MM-DD.
+#
+# A mandatory rule takes no record. A route of the class C1 takes no record.
+[]

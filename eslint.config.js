@@ -1,7 +1,13 @@
+import {
+  a11yPluginRules,
+  a11yPrimitiveSinks,
+  a11ySinks,
+} from './eslint-rules/accessibilityConfig.js'
 import requireCreateNull from './eslint-rules/requireCreateNull.js'
 import vitest from '@vitest/eslint-plugin'
 import auto from 'eslint-config-canonical/auto'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import noUnsanitized from 'eslint-plugin-no-unsanitized'
 import security from 'eslint-plugin-security'
 import globals from 'globals'
@@ -222,12 +228,13 @@ export default ts.config(
     },
   },
   {
+    files: ['**/*.{jsx,tsx}'],
+    plugins: { 'jsx-a11y': jsxA11y },
+    rules: a11yPluginRules,
+  },
+  {
     files: ['src/**/*.{ts,tsx}'],
-    ignores: [
-      'src/shared/parse/**',
-      'src/shared/sanitize/**',
-      '**/*.{test,spec,e2e}.{ts,tsx}',
-    ],
+    ignores: ['**/*.{test,spec,e2e}.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': [
         'error',
@@ -235,11 +242,38 @@ export default ts.config(
         ...parseSinks,
         ...htmlSinks,
         ...typeHoles,
+        ...a11ySinks,
+      ],
+    },
+  },
+  {
+    files: ['src/shared/parse/**/*.ts', 'src/shared/sanitize/**/*.ts'],
+    ignores: ['**/*.{test,spec}.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...bannedEverywhere,
+        ...a11yPrimitiveSinks,
+      ],
+    },
+  },
+  {
+    files: ['src/shared/ui/**/*.{ts,tsx}'],
+    ignores: ['**/*.{test,spec}.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...bannedEverywhere,
+        ...parseSinks,
+        ...htmlSinks,
+        ...typeHoles,
+        ...a11yPrimitiveSinks,
       ],
     },
   },
   {
     files: [
+      'eslint-rules/**/*.js',
       'src/shared/infrastructure/**/*.{ts,tsx}',
       'vitest.setup.ts',
       'vitest.setup.browser.ts',

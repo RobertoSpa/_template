@@ -1,0 +1,20 @@
+# One record per route, with the class of that route. Rule CLS-01 in docs/agents/accessibility.md.
+#
+# The class comes from three axes, and the strictest axis wins. The axes and
+# their values are in the key criticality of a11y/policy.yaml.
+#   harm: blocked, delayed, or degraded. What the user loses when the route fails.
+#   exposure: every_session, common, or rare. How many users reach the route.
+#   escape: none, assisted, or alternate_route. How the user gets the result
+#     a different way.
+#
+# A route with no record takes the class C1, which is the strictest class.
+# IEC 62304 gives this default: software with no documented class is class C.
+# A record that is absent costs the project, and it never saves the project.
+#
+# Example of a record:
+#   - path: /checkout
+#     harm: blocked
+#     exposure: common
+#     escape: none
+#     cause: the user cannot buy the product a different way.
+[]

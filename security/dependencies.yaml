@@ -49,6 +49,11 @@
   cause: resolves TypeScript paths for the import rules
   trust: version 3.10.1 was published with no provenance after an earlier one had one, and eslint-config-canonical pins ^3
   since: 2026-09-20
+- name: eslint-plugin-jsx-a11y
+  cause: the static gate of the accessibility pipeline, rule SOT-03
+  without: 36 rules that read the accessibility props of each JSX element
+  lines: 4000
+  since: 2026-09-20
 - name: eslint-plugin-no-unsanitized
   cause: refuses innerHTML and the other DOM script sinks, rule CODE-02
   since: 2026-09-20
