@@ -56,6 +56,48 @@ def readme_title_is_default(root):
     return text.startswith("# Project name")
 
 
+def package_lacks(root, name):
+    assert isinstance(root, Path)
+    assert len(name) > 0
+    package = root / "package.json"
+    if not package.is_file():
+        return True
+    text = package.read_text(encoding="utf-8")
+    assert len(text) > 0
+    return f'"{name}"' not in text
+
+
+def routes_are_empty(root):
+    assert isinstance(root, Path)
+    path = root / "a11y/routes.yaml"
+    if not path.is_file():
+        return False
+    lines = path.read_text(encoding="utf-8").splitlines()
+    body = [line for line in lines if line.strip() and not line.startswith("#")]
+    assert len(body) <= len(lines)
+    return body == ["[]"]
+
+
+def ui_primitives(root):
+    assert isinstance(root, Path)
+    directory = root / "src/shared/ui"
+    if not directory.is_dir():
+        return []
+    found = list(islice(directory.rglob("*.tsx"), SOURCE_FILES_MAX))
+    assert len(found) <= SOURCE_FILES_MAX
+    return found
+
+
+def page_files(root):
+    assert isinstance(root, Path)
+    directory = root / "src/pages"
+    if not directory.is_dir():
+        return []
+    found = list(islice(directory.rglob("*.tsx"), SOURCE_FILES_MAX))
+    assert len(found) <= SOURCE_FILES_MAX
+    return found
+
+
 def conditions(root):
     assert isinstance(root, Path)
     sources = source_files(root)
@@ -74,8 +116,17 @@ def conditions(root):
         "first module in `src/` has logic": stryker_floor_is_default(root)
         and len(sources) > 0,
         "src/shared/infrastructure": len(modules) > 0,
+        "first route renders": routes_are_empty(root) and len(page_files(root)) > 0,
+        "first interactive component exists": package_lacks(root, "axe-core")
+        and len(ui_primitives(root)) > 0,
+        "palette is complete": package_lacks(root, "apca-w3")
+        and (root / "DESIGN.md").is_file(),
+        "holds a primitive": package_lacks(
+            root, "@guidepup/virtual-screen-reader"
+        )
+        and len(ui_primitives(root)) > 0,
     }
-    assert len(live) == 7
+    assert len(live) == 11
     return live
 
 

@@ -1,0 +1,20 @@
+# One record per manual criterion per route. Rule ATT-01 in docs/agents/accessibility.md.
+#
+# 60.2 percent of the WCAG 2.2 criteria have no automated test. A record here
+# is the only proof that a person read one of them. The record dies when the
+# route changes, so a stale record is the same as no record.
+#
+# A record has eight fields.
+#   route: the path, such as /checkout.
+#   criterion: the WCAG criterion, such as 1.4.1.
+#   method: inspection, analysis, demonstration, or test.
+#   observed: what the person saw. The word "pass" is not an observation.
+#   signer: the name of the user. Rule ATT-04 refuses the name of the agent.
+#   date: the date of the check, as YYYY-MM-DD.
+#   tree_hash: the hash of the accessibility tree of the route at the check.
+#   commit: the commit of the working tree at the check.
+#
+# The gate pnpm a11y:attest reads the route again, computes the hash, and
+# compares it with tree_hash. A different hash makes the record stale, and a
+# stale record is a no-go.
+[]

@@ -40,10 +40,17 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   if grep -qx security/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
     fail 'SOT-04: a change to security/policy.yaml is its own pull request. Move the other files to a second branch.'
   fi
+  if grep -qx a11y/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
+    fail 'SOT-04: a change to a11y/policy.yaml is its own pull request. Move the other files to a second branch.'
+  fi
 done
 
 if ! mise exec -- pnpm security; then
   fail 'HPT-05: a gate is no-go. Read the lines above.'
+fi
+
+if ! pnpm a11y; then
+  fail 'SOT-02: an accessibility gate is no-go. Read the lines above.'
 fi
 
 log "OK $(git rev-parse --abbrev-ref HEAD)"

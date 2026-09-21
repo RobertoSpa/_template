@@ -1,0 +1,196 @@
+# The key map of each pattern. Rule CON-01 in docs/agents/accessibility.md.
+#
+# The ARIA Authoring Practices Guide gives two key models for the listbox, two
+# for the treeview, and two directions for the slider. This project picks one
+# model for each pattern. The second model is a refusal. The key chosen_model
+# names the pick and its cause.
+#
+# A component in src/shared/ui declares one pattern. The keyboard gate reads
+# the component and refuses a key map that is not the same as this file.
+version: 1
+
+patterns:
+  button:
+    role: button
+    native: button
+    source: https://www.w3.org/TR/html-aria/
+    keys:
+      Enter: activate the button
+      Space: activate the button
+
+  link:
+    role: link
+    native: a
+    source: https://www.w3.org/TR/html-aria/
+    keys:
+      Enter: follow the link
+
+  disclosure:
+    role: button
+    native: button
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
+    keys:
+      Enter: toggle the content
+      Space: toggle the content
+
+  dialog:
+    role: dialog
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
+    keys:
+      Tab: move focus to the next tabbable element, and wrap at the last one
+      Shift+Tab: move focus to the previous tabbable element, and wrap at the first one
+      Escape: close the dialog
+    focus:
+      on_open: the first tabbable element, or the primary action
+      on_close: the element that opened the dialog
+    trap: true
+
+  tabs:
+    role: tablist
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
+    chosen_model: manual activation. Focus moves with the arrow keys, and the
+      tab opens on Enter or Space. Automatic activation loses the content of
+      each tab that the user passes.
+    keys:
+      Tab: move focus into the tablist at the active tab, or out of the tablist
+      ArrowRight: move focus to the next tab, and wrap
+      ArrowLeft: move focus to the previous tab, and wrap
+      Enter: activate the tab that has focus
+      Space: activate the tab that has focus
+      Home: move focus to the first tab
+      End: move focus to the last tab
+    orientation_vertical:
+      ArrowDown: move focus to the next tab, and wrap
+      ArrowUp: move focus to the previous tab, and wrap
+
+  menu:
+    role: menu
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
+    keys:
+      Enter: activate the item, then close the menu
+      Space: activate the item, then close the menu
+      ArrowDown: move focus to the next item
+      ArrowUp: move focus to the previous item
+      ArrowRight: open the submenu
+      ArrowLeft: close the submenu, then move focus to the parent item
+      Home: move focus to the first item
+      End: move focus to the last item
+      Escape: close the menu, then move focus to the element that opened it
+      Character: move focus to the next item that starts with the character
+
+  menubar:
+    role: menubar
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
+    keys:
+      Tab: move focus into the menubar, or out of it, and close each open menu
+      ArrowRight: move focus to the next item of the menubar
+      ArrowLeft: move focus to the previous item of the menubar
+      ArrowDown: open the menu of the item that has focus
+      Enter: open the menu of the item that has focus
+      Home: move focus to the first item
+      End: move focus to the last item
+      Escape: close the open menu
+
+  combobox:
+    role: combobox
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+    chosen_model: the list is the popup, and aria-activedescendant keeps focus
+      in the text field. A roving tabindex in the popup moves the focus out of
+      the field, and then the typed characters go to the wrong element.
+    keys:
+      ArrowDown: open the popup, then move to the next option
+      ArrowUp: open the popup, then move to the previous option
+      Enter: accept the option, then close the popup
+      Escape: close the popup, and keep the value of the field
+      Home: move the cursor to the start of the field
+      End: move the cursor to the end of the field
+      Alt+ArrowDown: open the popup, and keep the position of the cursor
+      Alt+ArrowUp: close the popup
+
+  listbox:
+    role: listbox
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/listbox/
+    chosen_model: the model with Shift and Control. The APG gives a second
+      model that moves the selection with the arrow keys alone. That model
+      changes the data while the user reads it.
+    keys:
+      ArrowDown: move focus to the next option
+      ArrowUp: move focus to the previous option
+      Home: move focus to the first option
+      End: move focus to the last option
+      Space: toggle the selection of the option that has focus
+      Character: move focus to the next option that starts with the character
+    multiple:
+      Shift+ArrowDown: move focus to the next option, then extend the selection
+      Shift+ArrowUp: move focus to the previous option, then extend the selection
+      Shift+Space: select each option from the last selection to this option
+      Control+Shift+Home: extend the selection to the first option
+      Control+Shift+End: extend the selection to the last option
+      Control+A: select each option
+
+  radiogroup:
+    role: radiogroup
+    native: input type=radio
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/radio/
+    keys:
+      Tab: move focus into the group at the checked radio, or at the first one
+      Space: check the radio that has focus
+      ArrowDown: move focus to the next radio, check it, and wrap
+      ArrowRight: move focus to the next radio, check it, and wrap
+      ArrowUp: move focus to the previous radio, check it, and wrap
+      ArrowLeft: move focus to the previous radio, check it, and wrap
+    tab_stops: 1
+
+  slider:
+    role: slider
+    native: input type=range
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/slider/
+    chosen_model: ArrowUp and ArrowRight always increase the value. The APG
+      lets an author reverse the direction. A reversed slider is the same
+      control with the opposite answer to the same key.
+    keys:
+      ArrowRight: increase the value by one step
+      ArrowUp: increase the value by one step
+      ArrowLeft: decrease the value by one step
+      ArrowDown: decrease the value by one step
+      PageUp: increase the value by the large step
+      PageDown: decrease the value by the large step
+      Home: set the value to the minimum
+      End: set the value to the maximum
+
+  treeview:
+    role: tree
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/treeview/
+    chosen_model: the model with Shift and Control, which is the same model as
+      the listbox of this file. The APG gives a second model for the treeview.
+      Two selection models in one product is the fault that this file removes.
+    keys:
+      ArrowRight: open the closed node, or move focus to the first child
+      ArrowLeft: close the open node, or move focus to the parent node
+      ArrowDown: move focus to the next node that the user can see
+      ArrowUp: move focus to the previous node that the user can see
+      Home: move focus to the first node
+      End: move focus to the last node that the user can see
+      Enter: activate the node
+      Character: move focus to the next node that starts with the character
+
+  grid:
+    role: grid
+    source: https://www.w3.org/WAI/ARIA/apg/patterns/grid/
+    chosen_model: the arrow keys stop at the edge of the grid. A wrap moves the
+      user to a different row, and the user does not see the row change.
+    keys:
+      ArrowRight: move focus one cell to the right, and stop at the last cell
+      ArrowLeft: move focus one cell to the left, and stop at the first cell
+      ArrowDown: move focus one cell down, and stop at the last row
+      ArrowUp: move focus one cell up, and stop at the first row
+      Home: move focus to the first cell of the row
+      End: move focus to the last cell of the row
+      Control+Home: move focus to the first cell of the first row
+      Control+End: move focus to the last cell of the last row
+      PageDown: move focus down by the page step
+      PageUp: move focus up by the page step
+    editable:
+      Enter: start the edit of the cell
+      F2: start the edit of the cell, and stop it on the second press
+      Escape: stop the edit, and give the key map back to the grid

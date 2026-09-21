@@ -1,0 +1,147 @@
+# The one place that holds a color. Rule COLOR-01 in docs/agents/accessibility.md.
+#
+# The gate pnpm a11y:tokens reads each pair below, computes the WCAG 2 contrast
+# ratio, and refuses a pair that is less than the minimum in a11y/policy.yaml.
+# The ratio in each comment is the measured value at the time of the record.
+# The gate computes the value again on each run. The comment is a note, and the
+# computed value is the test.
+#
+# A pair is present here when the two tokens can meet on the screen. A pair
+# that is absent is a pair that the code cannot make. The static gate refuses a
+# color literal in src/, so this file is the whole palette.
+version: 1
+
+themes:
+  light:
+    surface: '#ffffff'
+    surface-raised: '#f4f4f5'
+    text: '#18181b'
+    text-muted: '#3f3f46'
+    text-subtle: '#52525b'
+    accent: '#1e40af'
+    on-accent: '#ffffff'
+    danger: '#991b1b'
+    success: '#14532d'
+    border: '#71717a'
+    focus: '#1e40af'
+
+  dark:
+    surface: '#09090b'
+    surface-raised: '#18181b'
+    text: '#fafafa'
+    text-muted: '#d4d4d8'
+    text-subtle: '#b1b1b8'
+    accent: '#93c5fd'
+    on-accent: '#09090b'
+    danger: '#fca5a5'
+    success: '#86efac'
+    border: '#71717a'
+    focus: '#93c5fd'
+
+# kind text: the minimum is contrast.text_min, which is 7.
+# kind large_text: the minimum is contrast.large_text_min, which is 4.5.
+# kind non_text: the minimum is contrast.non_text_min, which is 3.
+pairs:
+  - { theme: light, foreground: text, background: surface, kind: text } # 17.72
+  - { theme: light, foreground: text, background: surface-raised, kind: text } # 16.12
+  - { theme: light, foreground: text-muted, background: surface, kind: text } # 10.44
+  - {
+      theme: light,
+      foreground: text-muted,
+      background: surface-raised,
+      kind: text,
+    } # 9.50
+  - { theme: light, foreground: text-subtle, background: surface, kind: text } # 7.73
+  - {
+      theme: light,
+      foreground: text-subtle,
+      background: surface-raised,
+      kind: text,
+    } # 7.03
+  - { theme: light, foreground: accent, background: surface, kind: text } # 8.72
+  - { theme: light, foreground: accent, background: surface-raised, kind: text } # 7.94
+  - { theme: light, foreground: danger, background: surface, kind: text } # 8.31
+  - { theme: light, foreground: danger, background: surface-raised, kind: text } # 7.56
+  - { theme: light, foreground: success, background: surface, kind: text } # 9.11
+  - {
+      theme: light,
+      foreground: success,
+      background: surface-raised,
+      kind: text,
+    } # 8.29
+  - { theme: light, foreground: on-accent, background: accent, kind: text } # 8.72
+  - { theme: light, foreground: border, background: surface, kind: non_text } # 4.83
+  - {
+      theme: light,
+      foreground: border,
+      background: surface-raised,
+      kind: non_text,
+    } # 4.40
+  - { theme: light, foreground: focus, background: surface, kind: non_text } # 8.72
+  - {
+      theme: light,
+      foreground: focus,
+      background: surface-raised,
+      kind: non_text,
+    } # 7.94
+
+  - { theme: dark, foreground: text, background: surface, kind: text } # 19.06
+  - { theme: dark, foreground: text, background: surface-raised, kind: text } # 16.97
+  - { theme: dark, foreground: text-muted, background: surface, kind: text } # 13.46
+  - {
+      theme: dark,
+      foreground: text-muted,
+      background: surface-raised,
+      kind: text,
+    } # 11.99
+  - { theme: dark, foreground: text-subtle, background: surface, kind: text } # 9.33
+  - {
+      theme: dark,
+      foreground: text-subtle,
+      background: surface-raised,
+      kind: text,
+    } # 8.31
+  - { theme: dark, foreground: accent, background: surface, kind: text } # 11.03
+  - { theme: dark, foreground: accent, background: surface-raised, kind: text } # 9.82
+  - { theme: dark, foreground: danger, background: surface, kind: text } # 10.48
+  - { theme: dark, foreground: danger, background: surface-raised, kind: text } # 9.33
+  - { theme: dark, foreground: success, background: surface, kind: text } # 14.17
+  - { theme: dark, foreground: success, background: surface-raised, kind: text } # 12.62
+  - { theme: dark, foreground: on-accent, background: accent, kind: text } # 11.03
+  - { theme: dark, foreground: border, background: surface, kind: non_text } # 4.12
+  - {
+      theme: dark,
+      foreground: border,
+      background: surface-raised,
+      kind: non_text,
+    } # 3.67
+  - { theme: dark, foreground: focus, background: surface, kind: non_text } # 11.03
+  - {
+      theme: dark,
+      foreground: focus,
+      background: surface-raised,
+      kind: non_text,
+    } # 9.82
+
+# The step of each size. The target rule reads target.min_css_px from the
+# policy file, and a target token that is less than that number is a refusal.
+space:
+  '0': 0
+  '1': 4
+  '2': 8
+  '3': 12
+  '4': 16
+  '5': 24
+  '6': 32
+  '7': 48
+  '8': 64
+
+target:
+  minimum: 44
+  comfortable: 48
+
+# Rule MOT-02 gives each duration. The reduced run sets each one to 0.
+duration_ms:
+  instant: 0
+  fast: 120
+  normal: 200

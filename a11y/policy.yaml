@@ -1,0 +1,382 @@
+# Source of truth of the accessibility pipeline. The rules are in docs/agents/accessibility.md.
+version: 1
+
+gates:
+  - policy
+  - tokens
+  - static
+  - tree
+  - keyboard
+  - attest
+
+# Each rule sits in one layer. The layer says what refuses the violation.
+# impossible: the type or the token file makes the violation impossible to write.
+# proven: a tool decides the rule, and no person reads the result.
+# attested: a person signs the result, and the signature expires.
+layer:
+  names:
+    - impossible
+    - proven
+    - attested
+  default: attested
+  # A rule in a weak layer that a strong layer can hold is a defect.
+  promotion_is_mandatory: true
+
+conformance:
+  standard: WCAG 2.2
+  level: AA
+  # Each criterion of WCAG 2.2 at the level A and the level AA. Rule SOT-06
+  # makes one rule or more name each one of them.
+  base_criteria:
+    - '1.1.1'
+    - '1.2.1'
+    - '1.2.2'
+    - '1.2.3'
+    - '1.2.4'
+    - '1.2.5'
+    - '1.3.1'
+    - '1.3.2'
+    - '1.3.3'
+    - '1.3.4'
+    - '1.3.5'
+    - '1.4.1'
+    - '1.4.2'
+    - '1.4.3'
+    - '1.4.4'
+    - '1.4.5'
+    - '1.4.10'
+    - '1.4.11'
+    - '1.4.12'
+    - '1.4.13'
+    - '2.1.1'
+    - '2.1.2'
+    - '2.1.4'
+    - '2.2.1'
+    - '2.2.2'
+    - '2.3.1'
+    - '2.4.1'
+    - '2.4.2'
+    - '2.4.3'
+    - '2.4.4'
+    - '2.4.5'
+    - '2.4.6'
+    - '2.4.7'
+    - '2.4.11'
+    - '2.5.1'
+    - '2.5.2'
+    - '2.5.3'
+    - '2.5.4'
+    - '2.5.7'
+    - '2.5.8'
+    - '3.1.1'
+    - '3.1.2'
+    - '3.2.1'
+    - '3.2.2'
+    - '3.2.3'
+    - '3.2.4'
+    - '3.2.6'
+    - '3.3.1'
+    - '3.3.2'
+    - '3.3.3'
+    - '3.3.4'
+    - '3.3.7'
+    - '3.3.8'
+    - '4.1.2'
+    - '4.1.3'
+  # AAA criteria that this project adopts. Each one is stricter than the AA
+  # criterion with the same number.
+  adopted_aaa:
+    - '1.4.6'
+    - '1.4.8'
+    - '2.1.3'
+    - '2.3.2'
+    - '2.3.3'
+    - '2.4.9'
+    - '2.4.12'
+    - '2.4.13'
+    - '2.5.5'
+    - '3.2.5'
+    - '3.3.6'
+    - '3.3.9'
+  # WCAG 2.2 made 4.1.1 Parsing obsolete. html-validate reads the markup.
+  obsolete:
+    - '4.1.1'
+  # Deque measured these three numbers for WCAG 2.2. They are the cause of the
+  # attested layer. A green pipeline is not a conformance statement.
+  automation_ceiling:
+    full_percent: 29.5
+    partial_percent: 10.3
+    manual_percent: 60.2
+
+# The class of a route comes from three axes. The strictest axis wins.
+# A route with no record in a11y/routes.yaml takes the class default.
+criticality:
+  default: C1
+  file: a11y/routes.yaml
+  axes:
+    harm:
+      blocked: C1
+      delayed: C2
+      degraded: C3
+    exposure:
+      every_session: C1
+      common: C2
+      rare: C3
+    escape:
+      none: C1
+      assisted: C2
+      alternate_route: C3
+  attestation_days:
+    C1: 30
+    C2: 90
+    C3: 180
+  # A required rule on a C1 route takes no deviation record.
+  deviation_forbidden:
+    - C1
+
+contrast:
+  model: wcag2
+  text_min: 7
+  large_text_min: 4.5
+  non_text_min: 3
+  large_text_pt: 18
+  large_text_bold_pt: 14
+  # APCA left the WCAG 3 draft in 2023, and the 2026 draft has no contrast
+  # algorithm. The Lc value is a note in the report and never a refusal.
+  apca_reports_only: true
+
+target:
+  min_css_px: 44
+  spacing_css_px: 24
+
+text_spacing:
+  line_height_min: 1.5
+  paragraph_min: 2
+  letter_min: 0.12
+  word_min: 0.16
+
+reflow:
+  width_css_px: 320
+  height_css_px: 256
+  zoom_percent: 400
+
+line_length:
+  max_characters: 80
+  max_characters_cjk: 40
+
+focus:
+  perimeter_min_css_px: 2
+  outline_min_css_px: 4
+  contrast_min: 3
+  obscured_percent_max: 0
+
+motion:
+  flashes_per_second_max: 3
+  # The reduced run keeps no movement in space. A transform, a parallax, and a
+  # scroll animation are movement in space. An opacity change and a color
+  # change are not, and they carry the state that the user must see. A run with
+  # no feedback at all hides that state.
+  reduced_motion_spatial_allowed: false
+  reduced_motion_duration_ms_max: 200
+  autoplay_allowed: false
+
+timing:
+  response_instant_ms: 100
+  response_notice_ms: 1000
+  doherty_ms: 400
+  # WCAG 2.2.1 gives the user 10 times the default and 10 extensions.
+  limit_extension_factor: 10
+  limit_extension_count: 10
+
+layout:
+  cumulative_layout_shift_max: 0
+
+axe:
+  tags:
+    - wcag2a
+    - wcag2aa
+    - wcag21a
+    - wcag21aa
+    - wcag22aa
+    - best-practice
+  # An incomplete result is a result that axe cannot decide. It is a no-go
+  # until an attestation record covers it.
+  incomplete_is_a_refusal: true
+  rules_disabled: []
+
+# Each rule of eslint-plugin-jsx-a11y, at the level error. The deprecated
+# rules accessible-emoji, no-onchange and label-has-for are absent.
+eslint_jsx_a11y:
+  - alt-text
+  - anchor-ambiguous-text
+  - anchor-has-content
+  - anchor-is-valid
+  - aria-activedescendant-has-tabindex
+  - aria-props
+  - aria-proptypes
+  - aria-role
+  - aria-unsupported-elements
+  - autocomplete-valid
+  - click-events-have-key-events
+  - control-has-associated-label
+  - heading-has-content
+  - html-has-lang
+  - iframe-has-title
+  - img-redundant-alt
+  - interactive-supports-focus
+  - label-has-associated-control
+  - lang
+  - media-has-caption
+  - mouse-events-have-key-events
+  - no-access-key
+  - no-aria-hidden-on-focusable
+  - no-autofocus
+  - no-distracting-elements
+  - no-interactive-element-to-noninteractive-role
+  - no-noninteractive-element-interactions
+  - no-noninteractive-element-to-interactive-role
+  - no-noninteractive-tabindex
+  - no-redundant-roles
+  - no-static-element-interactions
+  - prefer-tag-over-role
+  - role-has-required-aria-props
+  - role-supports-aria-props
+  - scope
+  - tabindex-no-positive
+
+markup:
+  validator: html-validate
+  rules_required:
+    - duplicate-id
+    - unique-landmark
+    - no-redundant-role
+    - element-permitted-content
+    - wcag/h30
+    - wcag/h32
+    - wcag/h36
+    - wcag/h37
+    - wcag/h63
+    - wcag/h67
+    - wcag/h71
+
+# The one place that holds a color. The gate proves each pair that can meet.
+tokens:
+  file: a11y/tokens.yaml
+  # A color literal outside the token file is a refusal.
+  literals_allowed_in:
+    - a11y/tokens.yaml
+
+# The key map of each pattern. One model per pattern, and no second model.
+patterns:
+  file: a11y/patterns.yaml
+  # The APG gives two key models for each of these patterns, or two directions.
+  # Rule CON-06 makes the key chosen_model necessary for each one.
+  dual_model:
+    - combobox
+    - grid
+    - listbox
+    - slider
+    - tabs
+    - treeview
+  # The primitives live in one place. A raw interactive element elsewhere is
+  # a refusal.
+  primitives_directory: src/shared/ui
+  elements_reserved:
+    - a
+    - audio
+    - button
+    - details
+    - dialog
+    - input
+    - select
+    - summary
+    - textarea
+    - video
+
+# The golden files. A person writes each one before the code exists.
+golden:
+  aria_directory: a11y/aria
+  focus_directory: a11y/focus
+  announce_directory: a11y/announce
+  # An update flag writes the expected result from the observed result. That
+  # turns the test into a record of the defect.
+  update_flag_allowed: false
+
+# The keyboard fuzz run. Each route gets the same seed and the same count.
+fuzz:
+  keys:
+    - Tab
+    - Shift+Tab
+    - Enter
+    - Space
+    - Escape
+    - ArrowUp
+    - ArrowDown
+    - ArrowLeft
+    - ArrowRight
+    - Home
+    - End
+  steps_per_route: 400
+  seed: 1
+  invariants:
+    - focus_stays_in_the_document
+    - focus_is_never_on_the_body
+    - focus_is_always_visible
+    - escape_always_leaves_a_modal
+    - tab_order_matches_the_golden_file
+    - no_state_has_no_exit
+
+attestation:
+  file: a11y/attestations.yaml
+  # The record dies when the route changes. The hash is of the accessibility
+  # tree of the route, and not of the pixels.
+  stale_on_hash_change: true
+  methods:
+    - inspection
+    - analysis
+    - demonstration
+    - test
+  # The person that signs is not the agent that wrote the code.
+  independence_is_mandatory: true
+
+deviation:
+  file: a11y/deviations.yaml
+  max_days: 30
+
+# INCOSE rejects these words in a requirement. No tool can decide them. The
+# policy gate reads docs/agents/accessibility.md and refuses each one.
+ambiguous_words:
+  - adequate
+  - appropriate
+  - approximately
+  - easy
+  - efficient
+  - flexible
+  - friendly
+  - maximize
+  - minimize
+  - optimize
+  - quick
+  - rapid
+  - reasonable
+  - robust
+  - seamless
+  - sufficient
+  - user-friendly
+
+schedule:
+  weekly_day: monday
+  weekly_time_utc: '06:00'
+
+incident:
+  postmortems: docs/postmortems
+  postmortem_days: 3
+  never_events:
+    - a merge with a no-go from pnpm a11y
+    - a golden file written by a tool and not by a person
+    - an axe rule turned off with no deviation record
+    - an attestation record signed by the agent
+    - a color literal outside a11y/tokens.yaml
+    - a raw interactive element outside src/shared/ui
+    - a keyboard trap on a route of the class C1
+    - a conformance statement made from a green pipeline alone
