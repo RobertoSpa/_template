@@ -31,7 +31,7 @@ const topLevelProblems = (name: string, workflow: Workflow): string[] => {
   const permissions = workflow.permissions
 
   if (permissions === undefined || Object.keys(permissions).length > 0) {
-    problems.push(`${name}: permissions at the top is not {}`)
+    problems.push(`${name}: permissions at the top is not {}. Rule CI-02.`)
   }
 
   const triggers =
@@ -40,7 +40,7 @@ const topLevelProblems = (name: string, workflow: Workflow): string[] => {
       : []
 
   if (triggers.includes('pull_request_target')) {
-    problems.push(`${name}: uses the trigger pull_request_target`)
+    problems.push(`${name}: uses the trigger pull_request_target. Rule CI-03.`)
   }
 
   assert(problems.length <= 2)
@@ -60,11 +60,11 @@ const hardenRunnerProblems = (
     first?.uses === undefined ||
     !first.uses.startsWith(`${HARDEN_RUNNER}@`)
   ) {
-    return [`${prefix}: the first step is not ${HARDEN_RUNNER}`]
+    return [`${prefix}: the first step is not ${HARDEN_RUNNER}. Rule CI-05.`]
   }
 
   if (first.with?.['egress-policy'] !== 'block') {
-    return [`${prefix}: egress-policy is not block`]
+    return [`${prefix}: egress-policy is not block. Rule CI-05.`]
   }
 
   const endpoints = String(first.with['allowed-endpoints'] ?? '')
@@ -93,7 +93,7 @@ const usesProblems = (
   }
 
   if (!SHA_REFERENCE.test(uses)) {
-    return [`${prefix}: ${uses} is not pinned to a SHA`]
+    return [`${prefix}: ${uses} is not pinned to a SHA. Rule CI-01.`]
   }
 
   const owner = uses.split('/')[0] ?? ''

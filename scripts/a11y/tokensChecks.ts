@@ -128,7 +128,7 @@ export const pairProblems = (tokens: Tokens, minimums: Minimums): string[] => {
 
     if (!isHexColor(foreground) || !isHexColor(background)) {
       problems.push(
-        `pair ${index + 1}, ${named}, names a token that the themes do not hold.`,
+        `pair ${index + 1}, ${named}, names a token that the themes do not hold. Rule COLOR-01.`,
       )
       continue
     }
@@ -137,7 +137,7 @@ export const pairProblems = (tokens: Tokens, minimums: Minimums): string[] => {
 
     if (minimum === 0) {
       problems.push(
-        `pair ${index + 1}, ${named}, has the kind ${pair.kind}, which is not a kind of the policy.`,
+        `pair ${index + 1}, ${named}, has the kind ${pair.kind}, which is not a kind of the policy. Rule COLOR-02.`,
       )
       continue
     }

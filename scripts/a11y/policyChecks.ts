@@ -1,3 +1,4 @@
+import { type Rule, unparsedProblems } from '../rules.ts'
 import assert from 'node:assert'
 
 export type Conformance = {
@@ -55,20 +56,7 @@ export type Policy = {
   tokens: { file: string }
 }
 
-export type Rule = {
-  category: string
-  criteria: string[]
-  id: string
-  layer: string
-}
-
-const RULE_LINE =
-  /^- \*\*([A-Z]+-\d{2}) \(([AMR]), ([a-z]+), ([^)]+)\)\.\*\* /gmu
-// A bullet that opens with an identifier is a rule line. A different bullet is
-// prose, and the count of the rules does not hold it.
-const RULE_PREFIX = /^- \*\*[A-Z]+-\d{2} /u
 const BULLET = '- **'
-const CRITERION = /\d+\.\d+\.\d+/gu
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u
 const DEVIATION_FIELDS = [
   'approver',
@@ -79,8 +67,6 @@ const DEVIATION_FIELDS = [
   'risk',
   'rule',
 ] as const
-const RULES_MAX = 1_000
-const PROJECT = 'project'
 const MS_PER_DAY = 86_400_000
 
 const isIsoDate = (value: string | undefined): boolean => {
@@ -91,30 +77,6 @@ const isIsoDate = (value: string | undefined): boolean => {
   assert(typeof matched === 'boolean')
 
   return matched
-}
-
-export const parseRules = (rulesText: string): Rule[] => {
-  assert(rulesText.length > 0)
-  assert(rulesText.includes(BULLET))
-
-  const rules: Rule[] = []
-
-  for (const match of rulesText.matchAll(RULE_LINE)) {
-    const field = match[4]
-
-    rules.push({
-      category: match[2],
-      criteria:
-        field === PROJECT ? [] : (field.match(CRITERION) ?? []).map(String),
-      id: match[1],
-      layer: match[3],
-    })
-  }
-
-  assert(rules.length > 0, 'no rule line parsed')
-  assert(rules.length <= RULES_MAX)
-
-  return rules
 }
 
 export const ruleShapeProblems = (
@@ -131,7 +93,7 @@ export const ruleShapeProblems = (
   for (const rule of rules) {
     if (seen.has(rule.id)) {
       problems.push(
-        `${rule.id} has two rule lines. Each identifier is one rule.`,
+        `${rule.id} has two rule lines. Each identifier is one rule. Read the shape in the section "How to read a rule".`,
       )
     }
 
@@ -139,21 +101,12 @@ export const ruleShapeProblems = (
 
     if (!layers.includes(rule.layer)) {
       problems.push(
-        `${rule.id} names the layer ${rule.layer}, which layer.names does not hold.`,
+        `${rule.id} names the layer ${rule.layer}, which layer.names does not hold. Rule LAY-01.`,
       )
     }
   }
 
-  const bullets = rulesText.split('\n').filter((line) => RULE_PREFIX.test(line))
-  const unparsed = bullets.length - rules.length
-
-  assert(unparsed >= 0)
-
-  if (unparsed > 0) {
-    problems.push(
-      `${unparsed} bullet lines do not parse as a rule line. Read the shape in the section "How to read a rule".`,
-    )
-  }
+  problems.push(...unparsedProblems(rulesText, rules, 'LAY-01'))
 
   assert(seen.size <= rules.length)
 
@@ -291,7 +244,7 @@ const deviationDateProblems = (
 
   if (life > maxDays) {
     problems.push(
-      `deviation ${index + 1} lives ${life} days, and deviation.max_days is ${maxDays}.`,
+      `deviation ${index + 1} lives ${life} days, and deviation.max_days is ${maxDays}. Rule DEV-03.`,
     )
   }
 
@@ -320,7 +273,9 @@ export const deviationProblems = (
     const id = record.rule ?? ''
 
     if (id.length > 0 && !known.has(id)) {
-      problems.push(`deviation ${index + 1} names ${id}, which is not a rule.`)
+      problems.push(
+        `deviation ${index + 1} names ${id}, which is not a rule. Rule DEV-01.`,
+      )
     }
 
     if (mandatory.has(id)) {

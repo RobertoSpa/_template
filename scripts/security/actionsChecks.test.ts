@@ -36,12 +36,15 @@ describe('workflowProblems', () => {
   it.each([
     [
       { permissions: { contents: 'read' } },
-      'ci.yml: permissions at the top is not {}',
+      'ci.yml: permissions at the top is not {}. Rule CI-02.',
     ],
-    [{ permissions: undefined }, 'ci.yml: permissions at the top is not {}'],
+    [
+      { permissions: undefined },
+      'ci.yml: permissions at the top is not {}. Rule CI-02.',
+    ],
     [
       { on: { pull_request_target: null } },
-      'ci.yml: uses the trigger pull_request_target',
+      'ci.yml: uses the trigger pull_request_target. Rule CI-03.',
     ],
   ])('refuses the top level %o', (change, problem) => {
     expect(
@@ -52,7 +55,7 @@ describe('workflowProblems', () => {
   it.each([
     [
       [{ uses: `actions/checkout@${SHA}` }],
-      'ci.yml job checks: the first step is not step-security/harden-runner',
+      'ci.yml job checks: the first step is not step-security/harden-runner. Rule CI-05.',
     ],
     [
       [
@@ -61,7 +64,7 @@ describe('workflowProblems', () => {
           with: { 'egress-policy': 'audit' },
         },
       ],
-      'ci.yml job checks: egress-policy is not block',
+      'ci.yml job checks: egress-policy is not block. Rule CI-05.',
     ],
     [
       [
@@ -83,7 +86,7 @@ describe('workflowProblems', () => {
         },
         { uses: 'actions/checkout@v7' },
       ],
-      'ci.yml job checks: actions/checkout@v7 is not pinned to a SHA',
+      'ci.yml job checks: actions/checkout@v7 is not pinned to a SHA. Rule CI-01.',
     ],
     [
       [

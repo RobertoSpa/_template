@@ -16,17 +16,23 @@ describe('secretFileProblems', () => {
   })
 
   it.each([
-    ['.env', '.env matches the secret pattern .env'],
+    ['.env', '.env matches the secret pattern .env. Rule SEC-03.'],
     [
       'config/.env.local',
-      'config/.env.local matches the secret pattern .env.local',
+      'config/.env.local matches the secret pattern .env.local. Rule SEC-03.',
     ],
     [
       '.env.staging.local',
-      '.env.staging.local matches the secret pattern .env.*.local',
+      '.env.staging.local matches the secret pattern .env.*.local. Rule SEC-03.',
     ],
-    ['certs/server.pem', 'certs/server.pem matches the secret pattern *.pem'],
-    ['keys/id_rsa.pub', 'keys/id_rsa.pub matches the secret pattern id_rsa*'],
+    [
+      'certs/server.pem',
+      'certs/server.pem matches the secret pattern *.pem. Rule SEC-03.',
+    ],
+    [
+      'keys/id_rsa.pub',
+      'keys/id_rsa.pub matches the secret pattern id_rsa*. Rule SEC-03.',
+    ],
   ])('refuses the tracked file %s', (path, problem) => {
     expect(secretFileProblems(patterns, [path])).toStrictEqual([problem])
   })

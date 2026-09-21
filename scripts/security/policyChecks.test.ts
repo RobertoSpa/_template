@@ -1,7 +1,6 @@
 import {
   acceptedVulnerabilityProblems,
   binaryArtifactProblems,
-  categoriesOf,
   dependabotProblems,
   deviationProblems,
   type Policy,
@@ -56,18 +55,22 @@ describe('workspaceProblems', () => {
     [
       'minimumReleaseAge',
       1_440,
-      'minimumReleaseAge is 1440, policy wants 10080',
+      'minimumReleaseAge is 1440, policy wants 10080. Rule DEP-03.',
     ],
-    ['strictDepBuilds', false, 'strictDepBuilds is false, policy wants true'],
+    [
+      'strictDepBuilds',
+      false,
+      'strictDepBuilds is false, policy wants true. Rule DEP-05.',
+    ],
     [
       'blockExoticSubdeps',
       false,
-      'blockExoticSubdeps is false, policy wants true',
+      'blockExoticSubdeps is false, policy wants true. Rule DEP-06.',
     ],
     [
       'trustPolicy',
       'ignore',
-      'trustPolicy is ignore, policy wants no-downgrade',
+      'trustPolicy is ignore, policy wants no-downgrade. Rule DEP-07.',
     ],
   ])('refuses %s that drifts', (key, value, problem) => {
     const drifted = { ...workspace(), [key]: value }
@@ -82,7 +85,7 @@ describe('workspaceProblems', () => {
     }
 
     expect(workspaceProblems(policy(), drifted)).toStrictEqual([
-      'allowBuilds has sharp, policy dependency.allow_builds does not',
+      'allowBuilds has sharp, policy dependency.allow_builds does not. Rule DEP-05.',
     ])
   })
 
@@ -93,7 +96,7 @@ describe('workspaceProblems', () => {
     }
 
     expect(workspaceProblems(policy(), drifted)).toStrictEqual([
-      'trustPolicyExclude has semver, policy dependency.trust_policy_exclude does not',
+      'trustPolicyExclude has semver, policy dependency.trust_policy_exclude does not. Rule DEP-07.',
     ])
   })
 })
@@ -117,30 +120,15 @@ describe('dependabotProblems', () => {
   })
 
   it.each([
-    [3, 'npm cooldown is 3 days, policy wants 7 or more'],
-    [undefined, 'npm cooldown is missing, policy wants 7 or more'],
+    [3, 'npm cooldown is 3 days, policy wants 7 or more. Rule DEP-04.'],
+    [
+      undefined,
+      'npm cooldown is missing, policy wants 7 or more. Rule DEP-04.',
+    ],
   ])('refuses a cooldown of %s', (days, problem) => {
     expect(dependabotProblems(policy(), dependabot(days))).toStrictEqual([
       problem,
     ])
-  })
-})
-
-describe('categoriesOf', () => {
-  it('reads the category of each rule from the markdown', () => {
-    const markdown = [
-      '- **DEP-01 (M).** A new dependency must have a record.',
-      '- **DEP-12 (R).** A dependency with no release is replaced.',
-      '- **REPO-05 (A, public only).** When the repository becomes public.',
-    ].join('\n')
-
-    expect(categoriesOf(markdown)).toStrictEqual(
-      new Map([
-        ['DEP-01', 'M'],
-        ['DEP-12', 'R'],
-        ['REPO-05', 'A'],
-      ]),
-    )
   })
 })
 
@@ -166,13 +154,22 @@ describe('deviationProblems', () => {
 
   it.each([
     [{ rule: 'DEP-01' }, 'DEP-12 deviation 1: DEP-01 is mandatory'],
-    [{ rule: 'NOPE-99' }, 'DEP-12 deviation 1: NOPE-99 is not a rule'],
-    [{ expiry: '2026-09-19' }, 'DEP-12 deviation 1: expired on 2026-09-19'],
+    [
+      { rule: 'NOPE-99' },
+      'DEP-12 deviation 1: NOPE-99 is not a rule. Rule DEV-01.',
+    ],
+    [
+      { expiry: '2026-09-19' },
+      'DEP-12 deviation 1: expired on 2026-09-19. Rule DEV-03.',
+    ],
     [
       { expiry: '2026-10-11' },
       'DEP-12 deviation 1: lives 31 days, policy allows 30',
     ],
-    [{ rationale: '' }, 'DEP-12 deviation 1: rationale is missing'],
+    [
+      { rationale: '' },
+      'DEP-12 deviation 1: rationale is missing. Rule DEV-01.',
+    ],
   ])('refuses %o', (change, problem) => {
     const record = { ...deviation(), ...change }
     const expected = problem.replace('DEP-12', record.rule)
@@ -188,7 +185,7 @@ describe('deviationProblems', () => {
     expect(risk).toBe('no fix for a future CVE')
     expect(
       deviationProblems(policy(), categories, [record], today),
-    ).toStrictEqual(['DEP-12 deviation 1: risk is missing'])
+    ).toStrictEqual(['DEP-12 deviation 1: risk is missing. Rule DEV-01.'])
   })
 })
 
@@ -208,16 +205,19 @@ describe('acceptedVulnerabilityProblems', () => {
   it.each([
     [
       { ignoreUntil: '2026-10-01' },
-      'GHSA-xxxx-yyyy-zzzz: expiry 2026-10-01 is past the S3 deadline of 10 days',
+      'GHSA-xxxx-yyyy-zzzz: expiry 2026-10-01 is past the S3 deadline of 10 days. Rule VULN-01.',
     ],
     [
       { ignoreUntil: '2026-09-19' },
-      'GHSA-xxxx-yyyy-zzzz: expired on 2026-09-19',
+      'GHSA-xxxx-yyyy-zzzz: expired on 2026-09-19. Rule VULN-01.',
     ],
-    [{ ignoreUntil: undefined }, 'GHSA-xxxx-yyyy-zzzz: ignoreUntil is missing'],
+    [
+      { ignoreUntil: undefined },
+      'GHSA-xxxx-yyyy-zzzz: ignoreUntil is missing. Rule VULN-04.',
+    ],
     [
       { reason: 'not reachable' },
-      'GHSA-xxxx-yyyy-zzzz: reason does not start with S1, S2, S3, or S4',
+      'GHSA-xxxx-yyyy-zzzz: reason does not start with S1, S2, S3, or S4. Rule VULN-04.',
     ],
   ])('refuses %o', (change, problem) => {
     const entry = { ...accepted(), ...change }

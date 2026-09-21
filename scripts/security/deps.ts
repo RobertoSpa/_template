@@ -40,7 +40,7 @@ const osvProblems = (policy: Policy): string[] => {
   }
 
   return [
-    'osv-scanner found a vulnerability or a license problem',
+    'osv-scanner found a vulnerability or a license problem. Rule DEP-10 or DEP-11.',
     ...tail(result.output),
   ]
 }
