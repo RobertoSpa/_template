@@ -1,0 +1,121 @@
+# Source of truth of the resilience pipeline. The rules are in docs/agents/resilience.md.
+version: 1
+
+gates:
+  - policy
+  - routes
+  - fault
+
+deviation:
+  file: resilience/deviations.yaml
+  max_days: 30
+
+# Each rule sits in one layer. The layer says what refuses the violation.
+# The three names are the ones of a11y/policy.yaml.
+layer:
+  names:
+    - impossible
+    - proven
+    - attested
+  default: attested
+  promotion_is_mandatory: true
+
+# The error model. Rules ERR-01 to ERR-09.
+error:
+  # The one error type, its closed list of codes, and the message of each code.
+  file: src/shared/lib/appError.ts
+  # The one Result type.
+  result_file: src/shared/lib/result.ts
+  # The one parser that reads a caught value. The only file that reads unknown.
+  parser: src/shared/parse/appError.ts
+  # A throw lives in assert, in the boundary, and in the stub of the client. Rule ERR-01.
+  throw_allowed_in:
+    - src/shared/infrastructure/httpClient.ts
+    - src/shared/lib/assert.ts
+    - src/shared/ui/boundary.tsx
+  # A try statement lives in these paths. Rule BND-05.
+  catch_allowed_in:
+    - src/shared/infrastructure
+    - src/shared/ui/boundary.tsx
+  # The four members of an asynchronous state. Rule ERR-09.
+  async_states:
+    - idle
+    - loading
+    - failed
+    - done
+
+# The boundary tree. Rules BND-01 to BND-06.
+boundary:
+  file: src/shared/ui/boundary.tsx
+  levels:
+    - root
+    - route
+    - widget
+  # The component of a route, one file per page folder, holds the route
+  # boundary. The component of a widget holds the widget boundary. Rule BND-01.
+  route_files: src/pages/*/ui/*Page.tsx
+  widget_files: src/widgets/*/ui/*Widget.tsx
+  # OTP MaxR. Past the count in one mount, the boundary throws to its parent.
+  max_resets: 3
+  # The static fallback in index.html. A CSS delay shows it when no script
+  # replaced it in time. Rule BND-04.
+  fallback_text: The page cannot load. Reload the page, or try again later.
+  fallback_delay_ms: 5000
+
+# The network. Rules NET-01 to NET-05.
+network:
+  client: src/shared/infrastructure/httpClient.ts
+  timeout_ms: 5000
+  retry_max: 2
+  # Only a method with no side effect gets a retry. A POST never does.
+  retry_methods:
+    - GET
+    - HEAD
+  backoff_base_ms: 200
+  # The retry budget of one tab. Rule NET-05.
+  retry_budget_per_tab: 10
+  tiers:
+    - critical
+    - sheddable
+
+# The safe state of each route. Rules SAFE-01 to SAFE-06.
+routes:
+  file: resilience/routes.yaml
+  # The ladder of modes, from full function to none. AF447, normal, alternate, direct.
+  modes:
+    - normal
+    - reduced
+    - read-only
+    - static
+  # A route with no record gets this mode and each infrastructure module.
+  default_mode: static
+
+# Detection. Rules DET-01 to DET-03.
+detection:
+  reporter: src/shared/infrastructure/report.ts
+  fields:
+    - route
+    - release
+    - code
+    - context
+
+# Fault injection. Rules FIT-01 to FIT-03.
+fault:
+  suite: e2e/fault.e2e.ts
+  # Each case is one single fault condition. IEC 60601-1 4.7.
+  cases:
+    - timeout
+    - status_500
+    - malformed_body
+
+incident:
+  postmortems: docs/postmortems
+  postmortem_days: 3
+  never_events:
+    - a merge with a no-go from pnpm resilience
+    - a route that shows a blank screen after an error
+    - a fetch with no timeout
+    - a catch block that returns a guessed value
+    - a retry of a request with a method that is not in network.retry_methods
+    - an automatic action that the user cannot undo and that fired more than one time
+    - a kill switch that needs a deploy to turn on

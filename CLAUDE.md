@@ -99,6 +99,10 @@ Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/
 
 The rules are in `docs/agents/security.md`. The numbers are in `security/policy.yaml`. Each rule has a layer. A tool refuses each rule of the proven layer, and each no-go line names its rule. Read the rules of the attested layer before a dependency, a workflow, a secret, a release, or a merge. The command `grep attested docs/agents/security.md` lists them. To read one rule, run `pnpm explain <RULE-ID>`. Write the sign-in of that file in the first message of each task. Run `pnpm security` before each merge.
 
+### Resilience pipeline
+
+The rules are in `docs/agents/resilience.md`. The numbers are in `resilience/policy.yaml`. The rules say what the software does while one part is broken. An expected failure is a returned `Result`, and a bug is a thrown `Error`. A `try` lives only in `src/shared/infrastructure/` and in the boundary. Only the client in `src/shared/infrastructure/httpClient.ts` calls `fetch`. Each route has a record in `resilience/routes.yaml` with its core text, its safe mode, and its dependencies. Run `pnpm resilience` before each merge.
+
 <important if="a step in the setup list of README.md has no check">
 
 `README.md` holds the setup list of this project. Each step is a checkbox, and

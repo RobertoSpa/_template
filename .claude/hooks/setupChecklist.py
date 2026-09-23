@@ -67,9 +67,10 @@ def package_lacks(root, name):
     return f'"{name}"' not in text
 
 
-def routes_are_empty(root):
+def routes_are_empty(root, file):
     assert isinstance(root, Path)
-    path = root / "a11y/routes.yaml"
+    assert file.endswith(".yaml")
+    path = root / file
     if not path.is_file():
         return False
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -116,7 +117,12 @@ def conditions(root):
         "first module in `src/` has logic": stryker_floor_is_default(root)
         and len(sources) > 0,
         "src/shared/infrastructure": len(modules) > 0,
-        "first route renders": routes_are_empty(root) and len(page_files(root)) > 0,
+        "first route renders": routes_are_empty(root, "a11y/routes.yaml")
+        and len(page_files(root)) > 0,
+        "first route has no safe mode": routes_are_empty(
+            root, "resilience/routes.yaml"
+        )
+        and len(page_files(root)) > 0,
         "first interactive component exists": package_lacks(root, "axe-core")
         and len(ui_primitives(root)) > 0,
         "palette is complete": package_lacks(root, "apca-w3")
@@ -126,7 +132,7 @@ def conditions(root):
         )
         and len(ui_primitives(root)) > 0,
     }
-    assert len(live) == 11
+    assert len(live) == 12
     return live
 
 

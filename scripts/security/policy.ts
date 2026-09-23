@@ -29,7 +29,10 @@ import assert from 'node:assert'
 import { parse as parseToml } from 'smol-toml'
 
 const RULES_PATH = 'docs/agents/security.md'
-const ACCESSIBILITY_RULES_PATH = 'docs/agents/accessibility.md'
+const OTHER_RULES_PATHS = [
+  'docs/agents/accessibility.md',
+  'docs/agents/resilience.md',
+]
 // The file that tests the citation check holds citations of rules that do not
 // exist. Every other tracked file is read.
 const FIXTURE_PATH = 'scripts/rules.test.ts'
@@ -132,10 +135,7 @@ export const checkPolicy = (policy: Policy): Outcome => {
   const categories = new Map(rules.map((rule) => [rule.id, rule.category]))
   const known = identifiersOf([
     { file: RULES_PATH, text: rulesText },
-    {
-      file: ACCESSIBILITY_RULES_PATH,
-      text: readText(ACCESSIBILITY_RULES_PATH),
-    },
+    ...OTHER_RULES_PATHS.map((file) => ({ file, text: readText(file) })),
   ])
   const tracked = trackedFiles()
   const deviations = readYaml<Deviation[] | null>(policy.deviation.file) ?? []

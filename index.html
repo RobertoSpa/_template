@@ -7,9 +7,24 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>App</title>
+    <style>
+      #root > .fallback {
+        animation: fallback-appear 0s 5s forwards;
+        opacity: 0;
+      }
+      @keyframes fallback-appear {
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <p class="fallback">
+        The page cannot load. Reload the page, or try again later.
+      </p>
+    </div>
     <script
       type="module"
       src="/src/app/main.tsx"
