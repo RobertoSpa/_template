@@ -242,6 +242,10 @@ export default ts.config(
       'no-restricted-syntax': ['error', ...infrastructureSinks],
     },
   },
+  {
+    files: ['src/shared/infrastructure/**/*.integration.ts'],
+    rules: { 'no-restricted-imports': 'off' },
+  },
   ...resilienceBlocks,
   {
     files: ['**/*.{test,spec}.{ts,tsx}'],
