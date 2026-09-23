@@ -36,6 +36,11 @@ this project, and it occurs one time. Each step has a condition before it. Do
 a step when its condition is true, then write its check. A `SessionStart` hook
 prints the steps that apply at this time.
 
+A step that the template itself completes is not a milestone of a project.
+Delete that step with its condition in `.claude/hooks/setupChecklist.py`. A
+clone of the template inherits the work, and a check that travels with the
+clone reports work that no person did in that project.
+
 - [ ] The walking skeleton shows a name: write that name at the top of this file, in the place of `# Project name`. Then write one sentence below it.
 - [ ] The domain has a name: run the `domain-modeling` skill, which writes `CONTEXT.md` and `docs/adr/`.
 - [ ] The first feature has code: do the `graphify` setup.
@@ -47,6 +52,5 @@ prints the steps that apply at this time.
 - [ ] `src/shared/ui/` holds a primitive: add `@guidepup/virtual-screen-reader` and write the announce golden files. Rule EV-07 makes the result a note and not a statement about a real screen reader.
 - [ ] The folder `apps/api` exists: add `dependency-cruiser` with the Clean Architecture layers.
 - [ ] The first module in `src/` has logic: run `pnpm test:mutation`. Then increase the Stryker floor in `stryker.config.json` from 60 to the score that this project holds. The `Mutation` workflow runs on each pull request with `--incremental`, and each Monday with `--force`.
-- [x] The folder `src/shared/infrastructure/` holds a module: make sure that the `Integration` workflow starts on the pull request.
 
 Note: `pnpm test:mutation` stops with an error while `src/` has no module to mutate. The CI job finds this condition and does not run Stryker.

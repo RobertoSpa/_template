@@ -104,8 +104,6 @@ def conditions(root):
     sources = source_files(root)
     screens = [path for path in sources if path.suffix == ".tsx"]
     assert len(screens) <= len(sources)
-    infrastructure = root / "src/shared/infrastructure"
-    modules = list(islice(infrastructure.glob("*.ts"), SOURCE_FILES_MAX))
     live = {
         "walking skeleton": readme_title_is_default(root) and len(sources) > 0,
         "domain has a name": not (root / "CONTEXT.md").is_file() and len(sources) > 0,
@@ -116,7 +114,6 @@ def conditions(root):
         "apps/api": (root / "apps/api").is_dir(),
         "first module in `src/` has logic": stryker_floor_is_default(root)
         and len(sources) > 0,
-        "src/shared/infrastructure": len(modules) > 0,
         "first route renders": routes_are_empty(root, "a11y/routes.yaml")
         and len(page_files(root)) > 0,
         "first route has no safe mode": routes_are_empty(
@@ -132,7 +129,7 @@ def conditions(root):
         )
         and len(ui_primitives(root)) > 0,
     }
-    assert len(live) == 12
+    assert len(live) == 11
     return live
 
 
