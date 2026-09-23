@@ -41,11 +41,12 @@ prints the steps that apply at this time.
 - [ ] The first feature has code: do the `graphify` setup.
 - [ ] The first screen renders: do the `impeccable` setup.
 - [ ] The first route renders: write its record in `a11y/routes.yaml` with the three axes, then write the golden files that `a11y/policy.yaml` names. Read `docs/agents/accessibility.md` first.
+- [ ] The first route has no safe mode: write its record in `resilience/routes.yaml` with its core text, its safe mode, and its dependencies. Read `docs/agents/resilience.md` first.
 - [ ] The first interactive component exists: add `axe-core`, `@axe-core/playwright` and `html-validate`. Then turn on the axe run and the markup run in `pnpm a11y:tree` and `pnpm a11y:static`.
 - [ ] The palette is complete: add `apca-w3`, then turn on the APCA note of rule COLOR-07 in `pnpm a11y:tokens`.
 - [ ] `src/shared/ui/` holds a primitive: add `@guidepup/virtual-screen-reader` and write the announce golden files. Rule EV-07 makes the result a note and not a statement about a real screen reader.
 - [ ] The folder `apps/api` exists: add `dependency-cruiser` with the Clean Architecture layers.
 - [ ] The first module in `src/` has logic: run `pnpm test:mutation`. Then increase the Stryker floor in `stryker.config.json` from 60 to the score that this project holds. The `Mutation` workflow runs on each pull request with `--incremental`, and each Monday with `--force`.
-- [ ] The folder `src/shared/infrastructure/` holds a module: make sure that the `Integration` workflow starts on the pull request.
+- [x] The folder `src/shared/infrastructure/` holds a module: make sure that the `Integration` workflow starts on the pull request.
 
 Note: `pnpm test:mutation` stops with an error while `src/` has no module to mutate. The CI job finds this condition and does not run Stryker.

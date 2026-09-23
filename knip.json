@@ -1,4 +1,4 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["steiger.config.ts"]
+  "entry": ["steiger.config.ts", "src/shared/infrastructure/*.ts"]
 }

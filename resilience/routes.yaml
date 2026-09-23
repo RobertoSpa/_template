@@ -1,0 +1,28 @@
+# One record per route, with its safe state. Rule SAFE-01 in docs/agents/resilience.md.
+#
+# A record has six fields.
+#   page: the folder of src/pages/ that renders the route.
+#   path: the route, as the router names it.
+#   core: the visible text that proves the core function of the route. The fault
+#     suite asserts this text with each fault. A heading or a button label.
+#   safe_mode: the mode that the route goes to when a dependency fails. One of
+#     routes.modes in resilience/policy.yaml, and not normal.
+#   dependencies: each module of src/shared/infrastructure/ that the route calls.
+#     The fault suite makes each fault of fault.cases on each one.
+#   refresh: the visible text of the control that loads the data again. This
+#     field is optional. When it is present, the fault suite presses the control
+#     with a fault and asserts the core text. Rule SAFE-04.
+#
+# A route with no record gets the mode routes.default_mode and each module as a
+# dependency. A record that is missing costs the project, and it never saves the
+# project.
+#
+# Example of a record:
+#   - page: checkout
+#     path: /checkout
+#     core: Pay now
+#     safe_mode: read-only
+#     dependencies:
+#       - httpClient
+#       - report
+[]

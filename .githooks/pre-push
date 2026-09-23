@@ -43,6 +43,9 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   if grep -qx a11y/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
     fail 'SOT-04: a change to a11y/policy.yaml is its own pull request. Move the other files to a second branch.'
   fi
+  if grep -qx resilience/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
+    fail 'SOT-03: a change to resilience/policy.yaml is its own pull request. Move the other files to a second branch.'
+  fi
 done
 
 if ! mise exec -- pnpm security; then

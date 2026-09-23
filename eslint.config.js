@@ -3,7 +3,20 @@ import {
   a11yPrimitiveSinks,
   a11ySinks,
 } from './eslint-rules/accessibilityConfig.js'
+import {
+  bannedEverywhere,
+  bannedInTests,
+  bannedProperties,
+  htmlSinks,
+  parseSinks,
+  typeHoles,
+} from './eslint-rules/pennoConfig.js'
 import requireCreateNull from './eslint-rules/requireCreateNull.js'
+import {
+  infrastructureSinks,
+  resilienceBlocks,
+  resilienceSinks,
+} from './eslint-rules/resilienceConfig.js'
 import vitest from '@vitest/eslint-plugin'
 import auto from 'eslint-config-canonical/auto'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
@@ -14,83 +27,6 @@ import globals from 'globals'
 import ts from 'typescript-eslint'
 
 const SKILL = 'See .claude/skills/penno/SKILL.md'
-const SECURITY = 'See docs/agents/security.md'
-
-const parseSinks = [
-  {
-    message: `Input is parsed in one place. Move this call to src/shared/parse/ and return a typed value. Rule CODE-01. ${SECURITY}`,
-    selector:
-      'CallExpression[callee.object.name="JSON"][callee.property.name="parse"]',
-  },
-  {
-    message: `Input is parsed in one place. Move this call to src/shared/parse/ and return a typed value. Rule CODE-01. ${SECURITY}`,
-    selector: 'NewExpression[callee.name="URLSearchParams"]',
-  },
-  {
-    message: `A response is parsed in one place. Move this call to src/shared/parse/ and return a typed value. Rule CODE-01. ${SECURITY}`,
-    selector:
-      'CallExpression[callee.property.name=/^(json|text|formData)$/][callee.object.type!="Identifier"]',
-  },
-]
-
-const htmlSinks = [
-  {
-    message: `dangerouslySetInnerHTML takes only the value of the sanitize function in src/shared/sanitize/. Rule CODE-03. ${SECURITY}`,
-    selector: 'JSXAttribute[name.name="dangerouslySetInnerHTML"]',
-  },
-]
-
-const typeHoles = [
-  {
-    message: `unknown is a hole in the type proof. Parse the value into a named type. Rule CODE-05. ${SECURITY}`,
-    selector: 'TSUnknownKeyword',
-  },
-]
-
-const bannedInTests = [
-  {
-    message: `A mock asserts how the code talks to a collaborator, not what it did. Give the module a real dependency built by createNull(). ${SKILL}`,
-    selector:
-      'CallExpression[callee.object.name=/^(vi|jest)$/][callee.property.name=/^(mock|doMock|spyOn|mocked)$/]',
-  },
-  {
-    message: `A test id is a hook that only the test uses, so it tests the markup and not the behavior. Query by role, by label, or by visible text. ${SKILL}`,
-    selector:
-      'MemberExpression[property.name=/^(get|query|find)(All)?ByTestId$/]',
-  },
-  {
-    message: `A snapshot asserts nothing, because a wrong output is accepted the moment it is written. Name the value that you expect. ${SKILL}`,
-    selector: 'MemberExpression[property.name=/^toMatch(Inline)?Snapshot$/]',
-  },
-  {
-    message: `An empty catch block turns a thrown error into a pass. Assert on the rejection with expect(...).rejects or expect(...).toThrow(). ${SKILL}`,
-    selector: 'CatchClause > BlockStatement[body.length=0]',
-  },
-]
-
-const bannedEverywhere = [
-  {
-    message: `The clock is infrastructure. Take it from a wrapper in src/shared/infrastructure/ that exports create() and createNull(). ${SKILL}`,
-    selector: 'NewExpression[callee.name="Date"]',
-  },
-  {
-    message: `The environment is infrastructure. Read it one time in a wrapper in src/shared/infrastructure/ and pass the value down. ${SKILL}`,
-    selector: 'MemberExpression[object.name="process"][property.name="env"]',
-  },
-]
-
-const bannedProperties = [
-  {
-    message: `The clock is infrastructure. Take it from a wrapper in src/shared/infrastructure/ that exports create() and createNull(). ${SKILL}`,
-    object: 'Date',
-    property: 'now',
-  },
-  {
-    message: `A random number is infrastructure, and it makes a flaky test. Take it from a wrapper in src/shared/infrastructure/. ${SKILL}`,
-    object: 'Math',
-    property: 'random',
-  },
-]
 
 const pluginsUnused = ['@graphql-eslint', 'jsonc', 'yml']
 
@@ -161,14 +97,19 @@ export default ts.config(
         { 'ts-expect-error': true, 'ts-ignore': true, 'ts-nocheck': true },
       ],
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-floating-promises': [
+        'error',
+        { ignoreIIFE: false, ignoreVoid: false },
+      ],
       '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/only-throw-error': 'error',
     },
   },
   {
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
   {
-    files: ['scripts/**'],
+    files: ['scripts/**', 'e2e/**', 'eslint-rules/**'],
     rules: {
       'no-console': 'off',
       'no-template-curly-in-string': 'off',
@@ -243,6 +184,7 @@ export default ts.config(
         ...htmlSinks,
         ...typeHoles,
         ...a11ySinks,
+        ...resilienceSinks,
       ],
     },
   },
@@ -254,6 +196,7 @@ export default ts.config(
         'error',
         ...bannedEverywhere,
         ...a11yPrimitiveSinks,
+        ...resilienceSinks,
       ],
     },
   },
@@ -268,13 +211,14 @@ export default ts.config(
         ...htmlSinks,
         ...typeHoles,
         ...a11yPrimitiveSinks,
+        ...resilienceSinks,
       ],
     },
   },
   {
     files: [
+      'e2e/**',
       'eslint-rules/**/*.js',
-      'src/shared/infrastructure/**/*.{ts,tsx}',
       'vitest.setup.ts',
       'vitest.setup.browser.ts',
       'scripts/**',
@@ -287,10 +231,18 @@ export default ts.config(
   },
   {
     files: ['src/shared/infrastructure/**/*.{ts,tsx}'],
-    ignores: ['src/shared/infrastructure/**/*.{test,spec}.{ts,tsx}'],
+    ignores: [
+      'src/shared/infrastructure/**/*.{test,spec,integration}.{ts,tsx}',
+    ],
     plugins: { local: { rules: { 'require-create-null': requireCreateNull } } },
-    rules: { 'local/require-create-null': 'error' },
+    rules: {
+      'local/require-create-null': 'error',
+      'no-restricted-imports': 'off',
+      'no-restricted-properties': 'off',
+      'no-restricted-syntax': ['error', ...infrastructureSinks],
+    },
   },
+  ...resilienceBlocks,
   {
     files: ['**/*.{test,spec}.{ts,tsx}'],
     plugins: { vitest },

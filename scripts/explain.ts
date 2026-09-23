@@ -2,7 +2,11 @@ import { isIdentifier, ruleLinesOf, type RuleSource } from './rules.ts'
 import assert from 'node:assert'
 import { readFileSync } from 'node:fs'
 
-const RULE_FILES = ['docs/agents/accessibility.md', 'docs/agents/security.md']
+const RULE_FILES = [
+  'docs/agents/accessibility.md',
+  'docs/agents/resilience.md',
+  'docs/agents/security.md',
+]
 const USAGE = 'usage: pnpm explain <RULE-ID>, for example pnpm explain DEP-01'
 const BULLET = /^- /u
 
