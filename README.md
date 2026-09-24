@@ -47,6 +47,8 @@ clone reports work that no person did in that project.
 - [ ] The first screen renders: do the `impeccable` setup.
 - [ ] The first route renders: write its record in `a11y/routes.yaml` with the three axes, then write the golden files that `a11y/policy.yaml` names. Read `docs/agents/accessibility.md` first.
 - [ ] The first route has no safe mode: write its record in `resilience/routes.yaml` with its core text, its safe mode, and its dependencies. Read `docs/agents/resilience.md` first.
+- [ ] The first page ships to users: in `bundle/policy.yaml`, move its route to the stage `measured`. Then run `pnpm bundle:write`. Read `docs/agents/bundle.md` first.
+- [ ] A deploy target exists: make the host send the Brotli files at the quality of `measure.brotli_quality` in `bundle/policy.yaml`. Rule BYTE-01 measures that quality. Keep each `.map` file and the folder `dist/.vite/` out of the upload. Rule MAP-02.
 - [ ] The first interactive component exists: add `axe-core`, `@axe-core/playwright` and `html-validate`. Then turn on the axe run and the markup run in `pnpm a11y:tree` and `pnpm a11y:static`.
 - [ ] The palette is complete: add `apca-w3`, then turn on the APCA note of rule COLOR-07 in `pnpm a11y:tokens`.
 - [ ] `src/shared/ui/` holds a primitive: add `@guidepup/virtual-screen-reader` and write the announce golden files. Rule EV-07 makes the result a note and not a statement about a real screen reader.

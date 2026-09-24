@@ -1,0 +1,29 @@
+{
+  "files": {
+    "assets/index.js": {
+      "raw": 221755,
+      "wire": 59107
+    },
+    "index.html": {
+      "raw": 568,
+      "wire": 261
+    }
+  },
+  "packages": {
+    "react": 17276,
+    "react-dom": 536963,
+    "scheduler": 9324
+  },
+  "routes": {
+    "/": {
+      "css": 0,
+      "js": 59107,
+      "loaded": 59368,
+      "total": 59368
+    }
+  },
+  "total": {
+    "raw": 222323,
+    "wire": 59368
+  }
+}

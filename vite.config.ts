@@ -1,9 +1,11 @@
+import { bundleBuild, bundleModules } from './scripts/bundle/viteBuild.ts'
 import react from '@vitejs/plugin-react'
 import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  plugins: [react()],
+  build: bundleBuild(),
+  plugins: [react(), bundleModules()],
   test: {
     expect: { requireAssertions: true },
     passWithNoTests: true,

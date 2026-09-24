@@ -129,3 +129,18 @@ export const onBase = (ref: string, path: string): string | undefined => {
 
   return shown.status === 0 ? shown.output : undefined
 }
+
+// The files that the commits of the branch change, with no uncommitted work.
+export const changedFiles = (ref: string): string[] => {
+  assert(ref.length > 0)
+
+  const listed = execute('git', ['diff', '--name-only', `${ref}...HEAD`])
+
+  assert(listed.status === 0, `git diff --name-only ${ref}...HEAD failed`)
+
+  const files = listed.output.split('\n').filter((line) => line.length > 0)
+
+  assert(files.length <= 100_000)
+
+  return files
+}
