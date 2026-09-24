@@ -1,7 +1,10 @@
+import { deviationProblems, readDeviations } from '../deviations.ts'
 import {
   citationProblems,
+  collisionProblems,
   identifiersOf,
   parseRules,
+  RULE_FILES,
   type RuleSource,
   unparsedProblems,
 } from '../rules.ts'
@@ -11,8 +14,6 @@ import {
   binaryArtifactProblems,
   type Dependabot,
   dependabotProblems,
-  type Deviation,
-  deviationProblems,
   type Policy,
   type Workspace,
   workspaceProblems,
@@ -29,10 +30,6 @@ import assert from 'node:assert'
 import { parse as parseToml } from 'smol-toml'
 
 const RULES_PATH = 'docs/agents/security.md'
-const OTHER_RULES_PATHS = [
-  'docs/agents/accessibility.md',
-  'docs/agents/resilience.md',
-]
 // The file that tests the citation check holds citations of rules that do not
 // exist. Every other tracked file is read.
 const FIXTURE_PATH = 'scripts/rules.test.ts'
@@ -133,19 +130,26 @@ export const checkPolicy = (policy: Policy): Outcome => {
   const rulesText = readText(RULES_PATH)
   const rules = parseRules(rulesText)
   const categories = new Map(rules.map((rule) => [rule.id, rule.category]))
-  const known = identifiersOf([
-    { file: RULES_PATH, text: rulesText },
-    ...OTHER_RULES_PATHS.map((file) => ({ file, text: readText(file) })),
-  ])
+  const ruleSources = RULE_FILES.map((file) => ({
+    file,
+    text: readText(file),
+  }))
+  const known = identifiersOf(ruleSources)
   const tracked = trackedFiles()
-  const deviations = readYaml<Deviation[] | null>(policy.deviation.file) ?? []
+  const deviations = readDeviations(policy.deviation.file)
   const date = today()
   const problems = [
     ...unparsedProblems(rulesText, rules, 'DOC-01'),
     ...citationProblems(citedSources(tracked), known, 'DOC-02'),
+    ...collisionProblems(ruleSources, 'DOC-03'),
     ...workspaceProblems(policy, readYaml<Workspace>(WORKSPACE_PATH)),
     ...dependabotProblems(policy, readYaml<Dependabot>(DEPENDABOT_PATH)),
-    ...deviationProblems(policy, categories, deviations, date),
+    ...deviationProblems(deviations, {
+      ids: { expiry: 'DEV-03', fields: 'DEV-01', mandatory: 'DEV-02' },
+      maxDays: policy.deviation.max_days,
+      rules,
+      todayIso: date,
+    }),
     ...acceptedVulnerabilityProblems(
       policy,
       acceptedVulnerabilities(policy.vulnerability.accept_file),

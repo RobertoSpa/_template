@@ -1,13 +1,11 @@
-import { ambiguousWordProblems } from '../a11y/policyChecks.ts'
-import { exists, type Outcome, readText, readYaml } from '../a11y/shared.ts'
+import { exists, type Outcome, readText } from '../a11y/shared.ts'
+import { deviationProblems, readDeviations } from '../deviations.ts'
 import { parseRules, unparsedProblems } from '../rules.ts'
-import { execute, today } from '../security/shared.ts'
+import { baseRef, onBase, today } from '../security/shared.ts'
 import {
   codeRemovalProblems,
   codesOf,
   constantProblems,
-  type Deviation,
-  deviationProblems,
   fallbackProblems,
   messageProblems,
   safeDirectionProblems,
@@ -17,16 +15,15 @@ import assert from 'node:assert'
 import { parse as parseYaml } from 'yaml'
 
 const RULES_PATH = 'docs/agents/resilience.md'
-const ACCESSIBILITY_POLICY_PATH = 'a11y/policy.yaml'
 const INDEX_PATH = 'index.html'
 const TIMEOUT_CALL = 'AbortSignal.timeout(TIMEOUT_MS)'
 
 const onMain = (path: string): string | undefined => {
   assert(path.length > 0)
 
-  const shown = execute('git', ['show', `main:${path}`])
+  const ref = baseRef()
 
-  return shown.status === 0 ? shown.output : undefined
+  return ref === undefined ? undefined : onBase(ref, path)
 }
 
 const recordFilesProblems = (policy: Policy): string[] => {
@@ -49,7 +46,7 @@ const recordFilesProblems = (policy: Policy): string[] => {
     .filter((path) => !exists(path))
     .map(
       (path) =>
-        `the policy names ${path} and the file is missing. Rule SOT-01.`,
+        `the policy names ${path} and the file is missing. Rule RSOT-01.`,
     )
 }
 
@@ -116,18 +113,19 @@ export const checkPolicy = (policy: Policy): Outcome => {
 
   const rulesText = readText(RULES_PATH)
   const rules = parseRules(rulesText)
-  const a11y = readYaml<{ ambiguous_words: string[] }>(
-    ACCESSIBILITY_POLICY_PATH,
-  )
-  const deviations = readYaml<Deviation[] | null>(policy.deviation.file) ?? []
+  const deviations = readDeviations(policy.deviation.file)
   const problems = [
     ...unparsedProblems(rulesText, rules, 'DOC-01'),
-    ...ambiguousWordProblems(rulesText, a11y.ambiguous_words),
     ...recordFilesProblems(policy),
     ...nativeProblems(policy),
     ...codeProblems(policy),
     ...directionProblems(policy),
-    ...deviationProblems(deviations, rules, policy.deviation.max_days, today()),
+    ...deviationProblems(deviations, {
+      ids: { expiry: 'RDEV-01', fields: 'RDEV-01', mandatory: 'RDEV-01' },
+      maxDays: policy.deviation.max_days,
+      rules,
+      todayIso: today(),
+    }),
   ]
 
   assert(rules.length > 0)

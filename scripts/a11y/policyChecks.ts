@@ -7,16 +7,6 @@ export type Conformance = {
   obsolete: string[]
 }
 
-export type Deviation = {
-  approver?: string
-  date?: string
-  expiry?: string
-  place?: string
-  rationale?: string
-  risk?: string
-  rule?: string
-}
-
 export type Policy = {
   ambiguous_words: string[]
   attestation: {
@@ -57,27 +47,6 @@ export type Policy = {
 }
 
 const BULLET = '- **'
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u
-const DEVIATION_FIELDS = [
-  'approver',
-  'date',
-  'expiry',
-  'place',
-  'rationale',
-  'risk',
-  'rule',
-] as const
-const MS_PER_DAY = 86_400_000
-
-const isIsoDate = (value: string | undefined): boolean => {
-  assert(value === undefined || typeof value === 'string')
-
-  const matched = value !== undefined && ISO_DATE.test(value)
-
-  assert(typeof matched === 'boolean')
-
-  return matched
-}
 
 export const ruleShapeProblems = (
   rulesText: string,
@@ -134,7 +103,7 @@ export const ambiguousWordProblems = (
 
     for (const word of found) {
       problems.push(
-        `line ${index + 1} holds the word "${word}". No person can test it. Rule SOT-07.`,
+        `line ${index + 1} holds the word "${word}". No person can test it. Rule ASOT-07.`,
       )
     }
   }
@@ -176,7 +145,7 @@ export const traceabilityProblems = (
   for (const criterion of [...scope].toSorted()) {
     if (!named.has(criterion)) {
       problems.push(
-        `WCAG ${criterion} is in the scope and no rule names it. Rule SOT-06.`,
+        `WCAG ${criterion} is in the scope and no rule names it. Rule ASOT-06.`,
       )
     }
   }
@@ -184,110 +153,10 @@ export const traceabilityProblems = (
   for (const criterion of [...named].toSorted()) {
     if (!scope.has(criterion)) {
       problems.push(
-        `WCAG ${criterion} is named by a rule and the scope does not hold it. Rule SOT-06.`,
+        `WCAG ${criterion} is named by a rule and the scope does not hold it. Rule ASOT-06.`,
       )
     }
   }
-
-  return problems
-}
-
-const deviationFieldProblems = (record: Deviation, index: number): string[] => {
-  assert(index >= 0)
-  assert(typeof record === 'object')
-
-  const problems: string[] = []
-
-  for (const field of DEVIATION_FIELDS) {
-    const value = record[field]
-
-    if (value === undefined || value.trim().length === 0) {
-      problems.push(`deviation ${index + 1} has no ${field}. Rule DEV-01.`)
-    }
-  }
-
-  return problems
-}
-
-const deviationDateProblems = (
-  record: Deviation,
-  index: number,
-  maxDays: number,
-  todayIso: string,
-): string[] => {
-  assert(index >= 0)
-  assert(maxDays > 0)
-  assert(isIsoDate(todayIso))
-
-  const problems: string[] = []
-  const dated = isIsoDate(record.date) && isIsoDate(record.expiry)
-
-  if (!dated) {
-    return problems
-  }
-
-  const start = Date.parse(record.date ?? '')
-  const end = Date.parse(record.expiry ?? '')
-  const now = Date.parse(todayIso)
-
-  assert(Number.isFinite(start))
-  assert(Number.isFinite(end))
-
-  // The division rounds to the nearest whole day.
-  const life = Math.round((end - start) / MS_PER_DAY)
-
-  if (end < now) {
-    problems.push(
-      `deviation ${index + 1} expired on ${record.expiry}. Rule DEV-03.`,
-    )
-  }
-
-  if (life > maxDays) {
-    problems.push(
-      `deviation ${index + 1} lives ${life} days, and deviation.max_days is ${maxDays}. Rule DEV-03.`,
-    )
-  }
-
-  return problems
-}
-
-export const deviationProblems = (
-  records: Deviation[],
-  rules: Rule[],
-  maxDays: number,
-  todayIso: string,
-): string[] => {
-  assert(Array.isArray(records))
-  assert(maxDays > 0)
-  assert(isIsoDate(todayIso))
-
-  const mandatory = new Set(
-    rules.filter((rule) => rule.category === 'M').map((rule) => rule.id),
-  )
-  const known = new Set(rules.map((rule) => rule.id))
-  const problems: string[] = []
-
-  for (const [index, record] of records.entries()) {
-    problems.push(...deviationFieldProblems(record, index))
-
-    const id = record.rule ?? ''
-
-    if (id.length > 0 && !known.has(id)) {
-      problems.push(
-        `deviation ${index + 1} names ${id}, which is not a rule. Rule DEV-01.`,
-      )
-    }
-
-    if (mandatory.has(id)) {
-      problems.push(
-        `deviation ${index + 1} names ${id}, which is mandatory. Rule DEV-02.`,
-      )
-    }
-
-    problems.push(...deviationDateProblems(record, index, maxDays, todayIso))
-  }
-
-  assert(problems.length >= 0)
 
   return problems
 }

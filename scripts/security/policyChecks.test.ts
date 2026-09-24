@@ -2,7 +2,6 @@ import {
   acceptedVulnerabilityProblems,
   binaryArtifactProblems,
   dependabotProblems,
-  deviationProblems,
   type Policy,
   workspaceProblems,
 } from './policyChecks.ts'
@@ -129,63 +128,6 @@ describe('dependabotProblems', () => {
     expect(dependabotProblems(policy(), dependabot(days))).toStrictEqual([
       problem,
     ])
-  })
-})
-
-describe('deviationProblems', () => {
-  const categories = new Map([
-    ['DEP-01', 'M'],
-    ['DEP-12', 'R'],
-  ])
-  const deviation = () => ({
-    approver: 'RobertoSpa',
-    date: '2026-09-10',
-    expiry: '2026-10-01',
-    rationale: 'the only maintained fork',
-    risk: 'no fix for a future CVE',
-    rule: 'DEP-12',
-  })
-
-  it('accepts a full record of a required rule inside its life', () => {
-    expect(
-      deviationProblems(policy(), categories, [deviation()], today),
-    ).toStrictEqual([])
-  })
-
-  it.each([
-    [{ rule: 'DEP-01' }, 'DEP-12 deviation 1: DEP-01 is mandatory'],
-    [
-      { rule: 'NOPE-99' },
-      'DEP-12 deviation 1: NOPE-99 is not a rule. Rule DEV-01.',
-    ],
-    [
-      { expiry: '2026-09-19' },
-      'DEP-12 deviation 1: expired on 2026-09-19. Rule DEV-03.',
-    ],
-    [
-      { expiry: '2026-10-11' },
-      'DEP-12 deviation 1: lives 31 days, policy allows 30',
-    ],
-    [
-      { rationale: '' },
-      'DEP-12 deviation 1: rationale is missing. Rule DEV-01.',
-    ],
-  ])('refuses %o', (change, problem) => {
-    const record = { ...deviation(), ...change }
-    const expected = problem.replace('DEP-12', record.rule)
-
-    expect(
-      deviationProblems(policy(), categories, [record], today),
-    ).toStrictEqual([expected])
-  })
-
-  it('refuses a record with a missing field', () => {
-    const { risk, ...record } = deviation()
-
-    expect(risk).toBe('no fix for a future CVE')
-    expect(
-      deviationProblems(policy(), categories, [record], today),
-    ).toStrictEqual(['DEP-12 deviation 1: risk is missing. Rule DEV-01.'])
   })
 })
 

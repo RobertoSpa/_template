@@ -1,13 +1,12 @@
-import { parseRules, type Rule } from '../rules.ts'
+import { deviationProblems, readDeviations } from '../deviations.ts'
+import { parseRules, type Rule, RULE_FILES } from '../rules.ts'
 import {
   ambiguousWordProblems,
-  type Deviation,
-  deviationProblems,
   type Policy,
   ruleShapeProblems,
   traceabilityProblems,
 } from './policyChecks.ts'
-import { exists, type Outcome, readText, readYaml, today } from './shared.ts'
+import { exists, type Outcome, readText, today } from './shared.ts'
 import assert from 'node:assert'
 
 const RULES_PATH = 'docs/agents/accessibility.md'
@@ -31,7 +30,7 @@ const recordFilesProblems = (policy: Policy): string[] => {
   for (const path of paths) {
     if (!exists(path)) {
       problems.push(
-        `the policy names ${path} and the file is missing. Rule SOT-01.`,
+        `the policy names ${path} and the file is missing. Rule ASOT-01.`,
       )
     }
   }
@@ -71,7 +70,7 @@ const eslintProblems = (policy: Policy): string[] => {
 
   if (!config.includes(POLICY_PATH)) {
     problems.push(
-      `${ESLINT_PATH} does not read ${POLICY_PATH}. The policy is the one source of the rule list. Rule SOT-03.`,
+      `${ESLINT_PATH} does not read ${POLICY_PATH}. The policy is the one source of the rule list. Rule ASOT-03.`,
     )
   }
 
@@ -88,15 +87,24 @@ const rulesProblems = (
   assert(rules.length > 0)
   assert(rulesText.length > 0)
 
-  const deviations = readYaml<Deviation[]>(policy.deviation.file)
+  const deviations = readDeviations(policy.deviation.file)
 
   assert(Array.isArray(deviations))
 
   return [
     ...ruleShapeProblems(rulesText, rules, policy.layer.names),
-    ...ambiguousWordProblems(rulesText, policy.ambiguous_words),
+    ...RULE_FILES.flatMap((file) =>
+      ambiguousWordProblems(readText(file), policy.ambiguous_words).map(
+        (problem) => `${file} ${problem}`,
+      ),
+    ),
     ...traceabilityProblems(rules, policy.conformance),
-    ...deviationProblems(deviations, rules, policy.deviation.max_days, today()),
+    ...deviationProblems(deviations, {
+      ids: { expiry: 'ADEV-03', fields: 'ADEV-01', mandatory: 'ADEV-02' },
+      maxDays: policy.deviation.max_days,
+      rules,
+      todayIso: today(),
+    }),
   ]
 }
 

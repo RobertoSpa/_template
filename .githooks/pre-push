@@ -41,10 +41,10 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     fail 'SOT-04: a change to security/policy.yaml is its own pull request. Move the other files to a second branch.'
   fi
   if grep -qx a11y/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
-    fail 'SOT-04: a change to a11y/policy.yaml is its own pull request. Move the other files to a second branch.'
+    fail 'ASOT-04: a change to a11y/policy.yaml is its own pull request. Move the other files to a second branch.'
   fi
   if grep -qx resilience/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
-    fail 'SOT-03: a change to resilience/policy.yaml is its own pull request. Move the other files to a second branch.'
+    fail 'RSOT-03: a change to resilience/policy.yaml is its own pull request. Move the other files to a second branch.'
   fi
 done
 
@@ -53,7 +53,11 @@ if ! mise exec -- pnpm security; then
 fi
 
 if ! pnpm a11y; then
-  fail 'SOT-02: an accessibility gate is no-go. Read the lines above.'
+  fail 'ASOT-02: an accessibility gate is no-go. Read the lines above.'
+fi
+
+if ! pnpm resilience policy routes; then
+  fail 'RSOT-02: a resilience gate is no-go. Read the lines above.'
 fi
 
 log "OK $(git rev-parse --abbrev-ref HEAD)"

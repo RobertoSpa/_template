@@ -1,4 +1,4 @@
-# One record per deviation from a required rule. Rule DEV-01 in docs/agents/accessibility.md.
+# One record per deviation from a required rule. Rule ADEV-01 in docs/agents/accessibility.md.
 #
 # A record has seven fields.
 #   rule: the identifier of the rule, such as KEY-03.

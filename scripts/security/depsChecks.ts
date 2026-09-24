@@ -22,7 +22,23 @@ export type PackageJson = {
 }
 
 const RECORDS_FILE = 'security/dependencies.yaml'
-const RANGE_MARK = /[\s*<>^x|~]/u
+// One version is a full semantic version, with an optional prerelease tag.
+const CORE_VERSION = /^\d+\.\d+\.\d+$/u
+const PRERELEASE = /^[\w.]+$/u
+
+const isOneVersion = (version: string): boolean => {
+  assert(typeof version === 'string')
+
+  const [core, ...rest] = version.split('-')
+  const prerelease = rest.join('-')
+
+  assert(core !== undefined)
+
+  return (
+    CORE_VERSION.test(core) &&
+    (rest.length === 0 || PRERELEASE.test(prerelease))
+  )
+}
 
 const runtimeRecordProblems = (
   policy: DependencyPolicy,
@@ -143,18 +159,21 @@ export const recordProblems = (
   return problems
 }
 
-export const pinNotes = (packageJson: PackageJson): string[] => {
+export const pinProblems = (packageJson: PackageJson): string[] => {
   assert(typeof packageJson === 'object')
 
   const entries = [
     ...Object.entries(packageJson.dependencies ?? {}),
     ...Object.entries(packageJson.devDependencies ?? {}),
   ]
-  const notes = entries
-    .filter(([, version]) => RANGE_MARK.test(version))
-    .map(([name, version]) => `${name} is ${version}, not one version`)
+  const problems = entries
+    .filter(([, version]) => !isOneVersion(version))
+    .map(
+      ([name, version]) =>
+        `${name} is ${version}, not one version. Rule DEP-15.`,
+    )
 
-  assert(notes.length <= entries.length)
+  assert(problems.length <= entries.length)
 
-  return notes
+  return problems
 }

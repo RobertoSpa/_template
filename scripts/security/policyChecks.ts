@@ -13,15 +13,6 @@ export type Dependabot = {
   }>
 }
 
-export type Deviation = {
-  approver?: string
-  date?: string
-  expiry?: string
-  rationale?: string
-  risk?: string
-  rule?: string
-}
-
 export type Policy = {
   actions: {
     egress_allowed: string[]
@@ -54,14 +45,6 @@ export type Workspace = {
 
 const MINUTES_PER_DAY = 1_440
 const MILLISECONDS_PER_DAY = 86_400_000
-const DEVIATION_FIELDS = [
-  'rule',
-  'rationale',
-  'risk',
-  'approver',
-  'date',
-  'expiry',
-] as const
 const SEVERITY_PREFIX = /^(S[1-4]):/u
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u
 
@@ -186,88 +169,6 @@ export const dependabotProblems = (
   }
 
   assert(problems.length <= dependabot.updates.length)
-
-  return problems
-}
-
-const deviationRuleProblems = (
-  categories: Map<string, string>,
-  rule: string,
-): string[] => {
-  assert(rule.length > 0)
-  assert(categories.size > 0)
-
-  const category = categories.get(rule)
-
-  if (category === undefined) {
-    return [`${rule} is not a rule. Rule DEV-01.`]
-  }
-
-  return category === 'M' ? [`${rule} is mandatory`] : []
-}
-
-const deviationDateProblems = (
-  maxDays: number,
-  date: string,
-  expiry: string,
-  today: string,
-): string[] => {
-  assert(maxDays > 0)
-  assert(ISO_DATE.test(date))
-
-  if (daysBetween(today, expiry) < 0) {
-    return [`expired on ${expiry}. Rule DEV-03.`]
-  }
-
-  const life = daysBetween(date, expiry)
-
-  return life > maxDays ? [`lives ${life} days, policy allows ${maxDays}`] : []
-}
-
-const deviationRecordProblems = (
-  policy: Policy,
-  categories: Map<string, string>,
-  record: Deviation,
-  today: string,
-): string[] => {
-  assert(policy.deviation.max_days > 0)
-  assert(ISO_DATE.test(today))
-
-  const missing = DEVIATION_FIELDS.find((field) => !record[field])
-
-  if (missing !== undefined) {
-    return [`${missing} is missing. Rule DEV-01.`]
-  }
-
-  const { date, expiry, rule } = record
-
-  assert(date !== undefined)
-  assert(expiry !== undefined)
-  assert(rule !== undefined)
-
-  return [
-    ...deviationRuleProblems(categories, rule),
-    ...deviationDateProblems(policy.deviation.max_days, date, expiry, today),
-  ].slice(0, 1)
-}
-
-export const deviationProblems = (
-  policy: Policy,
-  categories: Map<string, string>,
-  deviations: Deviation[],
-  today: string,
-): string[] => {
-  assert(Array.isArray(deviations))
-  assert(categories.size > 0)
-
-  const problems = deviations.flatMap((record, index) =>
-    deviationRecordProblems(policy, categories, record, today).map(
-      (problem) =>
-        `${record.rule ?? 'unnamed'} deviation ${index + 1}: ${problem}`,
-    ),
-  )
-
-  assert(problems.length <= deviations.length)
 
   return problems
 }

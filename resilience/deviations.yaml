@@ -1,5 +1,5 @@
-# One record per deviation from a required rule. Rule DEV-01 in docs/agents/resilience.md.
+# One record per deviation from a required rule. Rule RDEV-01 in docs/agents/resilience.md.
 #
-# A record has the seven fields of a11y/deviations.yaml, with route in the place
-# of place. A mandatory rule takes no record.
+# A record has the seven fields of Rule DEV-01 in docs/agents/security.md. The
+# field place names one route. A mandatory rule takes no record.
 []

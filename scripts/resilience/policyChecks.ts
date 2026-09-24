@@ -1,15 +1,5 @@
-import { type Rule } from '../rules.ts'
 import assert from 'node:assert'
 
-export type Deviation = {
-  approver?: string
-  date?: string
-  expiry?: string
-  rationale?: string
-  risk?: string
-  route?: string
-  rule?: string
-}
 export type SafeNumbers = {
   boundary: { fallback_delay_ms: number; max_resets: number }
   network: {
@@ -22,19 +12,8 @@ type Wanted = Record<string, number | string[]>
 
 const CONSTANT_MAX = 100
 const CODE_MAX = 1_000
-const RECORDS_MAX = 1_000
-const MS_PER_DAY = 86_400_000
 const MESSAGE_LINE = /^\s+(\w+): '(.*)',$/u
 const SENTENCE_END = /\. /u
-const DEVIATION_FIELDS = [
-  'approver',
-  'date',
-  'expiry',
-  'rationale',
-  'risk',
-  'route',
-  'rule',
-] as const
 const SAFE_NUMBERS: Array<[string, (numbers: SafeNumbers) => number]> = [
   [
     'boundary.fallback_delay_ms',
@@ -87,7 +66,7 @@ export const constantProblems = (
     const raw = constantOf(text, name)
 
     if (raw === undefined) {
-      problems.push(`${file} has no constant ${name}. Rule SOT-01.`)
+      problems.push(`${file} has no constant ${name}. Rule RSOT-01.`)
 
       continue
     }
@@ -96,7 +75,7 @@ export const constantProblems = (
 
     if (String(found) !== String(value)) {
       problems.push(
-        `${file} holds ${name} = ${[found].flat().join(', ')}, and the policy holds ${[value].flat().join(', ')}. Rule SOT-01.`,
+        `${file} holds ${name} = ${[found].flat().join(', ')}, and the policy holds ${[value].flat().join(', ')}. Rule RSOT-01.`,
       )
     }
   }
@@ -186,7 +165,7 @@ export const safeDirectionProblems = (
 
     if (after > before) {
       problems.push(
-        `${name} moves from ${before} to ${after}, the unsafe direction. Rule SOT-04 wants a deviation record.`,
+        `${name} moves from ${before} to ${after}, the unsafe direction. Rule RSOT-04 wants a deviation record.`,
       )
     }
   }
@@ -215,76 +194,6 @@ export const fallbackProblems = (
     problems.push(
       `index.html does not hold the fallback delay ${delay}. Rule BND-04.`,
     )
-  }
-
-  return problems
-}
-
-const daysBetween = (from: string, to: string): number => {
-  assert(from.length === 10)
-  assert(to.length === 10)
-
-  return Math.round((Date.parse(to) - Date.parse(from)) / MS_PER_DAY)
-}
-
-const recordProblems = (
-  record: Deviation,
-  index: number,
-  rules: Rule[],
-): string[] => {
-  assert(index >= 0)
-  assert(rules.length > 0)
-
-  const problems: string[] = []
-
-  for (const field of DEVIATION_FIELDS) {
-    if ((record[field] ?? '').length === 0) {
-      problems.push(`record ${index} has no ${field}. Rule DEV-01.`)
-    }
-  }
-
-  const rule = rules.find((one) => one.id === record.rule)
-
-  if (rule?.category === 'M') {
-    problems.push(
-      `record ${index} deviates from ${rule.id}, and a mandatory rule has no deviation. Rule DEV-01.`,
-    )
-  }
-
-  return problems
-}
-
-export const deviationProblems = (
-  records: Deviation[],
-  rules: Rule[],
-  maxDays: number,
-  todayIso: string,
-): string[] => {
-  assert(records.length <= RECORDS_MAX)
-  assert(maxDays > 0)
-
-  const problems: string[] = []
-
-  for (const [index, record] of records.entries()) {
-    problems.push(...recordProblems(record, index, rules))
-
-    const { date = '', expiry = '' } = record
-
-    if (date.length !== 10 || expiry.length !== 10) {
-      continue
-    }
-
-    if (expiry < todayIso) {
-      problems.push(`record ${index} expired on ${expiry}. Rule DEV-01.`)
-    }
-
-    const days = daysBetween(date, expiry)
-
-    if (days > maxDays) {
-      problems.push(
-        `record ${index} lives ${days} days, and deviation.max_days is ${maxDays}. Rule DEV-01.`,
-      )
-    }
   }
 
   return problems

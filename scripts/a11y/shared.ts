@@ -1,6 +1,6 @@
 import { type Policy } from './policyChecks.ts'
 import assert from 'node:assert'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { parse as parseYaml } from 'yaml'
 
 export type Gate = (policy: Policy) => Outcome
@@ -55,4 +55,22 @@ export const today = (): string => {
   assert(date.startsWith('20'))
 
   return date
+}
+
+// The folders of a path, in alphabetical sequence. A missing path has none.
+export const folders = (path: string): string[] => {
+  assert(path.length > 0)
+
+  if (!existsSync(path)) {
+    return []
+  }
+
+  const entries = readdirSync(path, { withFileTypes: true })
+
+  assert(entries.length <= 10_000)
+
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .toSorted()
 }

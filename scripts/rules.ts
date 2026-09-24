@@ -24,6 +24,13 @@ const BULLET = '- **'
 const SOURCES_MAX = 5_000
 const LINES_MAX = 100_000
 
+// The one list of rule files. `pnpm explain` and the citation check read it.
+export const RULE_FILES = [
+  'docs/agents/accessibility.md',
+  'docs/agents/resilience.md',
+  'docs/agents/security.md',
+]
+
 export const isIdentifier = (value: string): boolean => {
   assert(typeof value === 'string')
   assert(value.length < 100)
@@ -73,6 +80,33 @@ export const identifiersOf = (sources: RuleSource[]): Set<string> => {
   assert(identifiers.size <= LINES_MAX)
 
   return identifiers
+}
+
+export const collisionProblems = (
+  sources: RuleSource[],
+  rule: string,
+): string[] => {
+  assert(sources.length > 0)
+  assert(sources.length <= SOURCES_MAX)
+
+  const owners = new Map<string, string[]>()
+
+  for (const source of sources) {
+    for (const id of identifiersOf([source])) {
+      owners.set(id, [...(owners.get(id) ?? []), source.file])
+    }
+  }
+
+  const problems = [...owners]
+    .filter(([, files]) => files.length > 1)
+    .map(
+      ([id, files]) =>
+        `${id} is a rule of ${files.join(' and ')}. Give the subsequent file its own prefix. Rule ${rule}.`,
+    )
+
+  assert(problems.length <= owners.size)
+
+  return problems
 }
 
 const ruleOf = (id: string, fields: string[]): Rule | undefined => {

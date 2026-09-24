@@ -13,7 +13,10 @@ import { parse as parseYaml } from 'yaml'
 const RESILIENCE = 'See docs/agents/resilience.md'
 const POLICY_PATH = 'resilience/policy.yaml'
 
-const resilience = parseYaml(readFileSync(POLICY_PATH, 'utf8'))
+// The path is relative to this file, so a tool that starts in a different folder reads the same policy.
+const resilience = parseYaml(
+  readFileSync(new URL(`../${POLICY_PATH}`, import.meta.url), 'utf8'),
+)
 
 const throwSink = {
   message: `A throw is a bug, and an expected failure is a returned Result. A throw lives in ${resilience.error.throw_allowed_in.join(', ')}. Rule ERR-01. ${RESILIENCE}`,
@@ -146,7 +149,9 @@ export const resilienceBlocks = [
   },
   {
     files: [resilience.network.client],
-    rules: { 'no-restricted-syntax': ['error', ...clientSinks] },
+    rules: {
+      'no-restricted-syntax': ['error', ...clientSinks],
+    },
   },
   {
     files: [resilience.detection.reporter],

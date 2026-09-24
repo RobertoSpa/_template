@@ -2,7 +2,6 @@ import {
   codeRemovalProblems,
   codesOf,
   constantProblems,
-  deviationProblems,
   fallbackProblems,
   messageProblems,
   safeDirectionProblems,
@@ -24,21 +23,6 @@ const ERRORS = [
   '',
 ].join('\n')
 
-const RULES = [
-  { category: 'M', criteria: [], id: 'ERR-01', layer: 'proven' },
-  { category: 'R', criteria: [], id: 'SOT-04', layer: 'proven' },
-]
-
-const RECORD = {
-  approver: 'a person',
-  date: '2026-09-01',
-  expiry: '2026-09-20',
-  rationale: 'a cause',
-  risk: 'a user',
-  route: '/a',
-  rule: 'SOT-04',
-}
-
 describe('constantProblems', () => {
   it('gives no problem when each constant agrees with the policy', () => {
     expect(
@@ -54,17 +38,17 @@ describe('constantProblems', () => {
     [
       'a number',
       { TIMEOUT_MS: 4_000 },
-      'client.ts holds TIMEOUT_MS = 5000, and the policy holds 4000. Rule SOT-01.',
+      'client.ts holds TIMEOUT_MS = 5000, and the policy holds 4000. Rule RSOT-01.',
     ],
     [
       'a list',
       { RETRY_METHODS: ['GET'] },
-      'client.ts holds RETRY_METHODS = GET, HEAD, and the policy holds GET. Rule SOT-01.',
+      'client.ts holds RETRY_METHODS = GET, HEAD, and the policy holds GET. Rule RSOT-01.',
     ],
     [
       'a missing constant',
       { BACKOFF_BASE_MS: 200 },
-      'client.ts has no constant BACKOFF_BASE_MS. Rule SOT-01.',
+      'client.ts has no constant BACKOFF_BASE_MS. Rule RSOT-01.',
     ],
   ])('names %s that disagrees', (_name, wanted, problem) => {
     expect(constantProblems(CLIENT, 'client.ts', wanted)).toStrictEqual([
@@ -142,7 +126,7 @@ describe('safeDirectionProblems', () => {
         network: { retry_budget_per_tab: 10, retry_max: 2, timeout_ms: 5_000 },
       }),
     ).toStrictEqual([
-      'boundary.max_resets moves from 2 to 3, the unsafe direction. Rule SOT-04 wants a deviation record.',
+      'boundary.max_resets moves from 2 to 3, the unsafe direction. Rule RSOT-04 wants a deviation record.',
     ])
   })
 })
@@ -168,55 +152,6 @@ describe('fallbackProblems', () => {
       fallbackProblems(html, 'The page cannot load.', 3_000),
     ).toStrictEqual([
       'index.html does not hold the fallback delay 0s 3s. Rule BND-04.',
-    ])
-  })
-})
-
-describe('deviationProblems', () => {
-  it('gives no problem for a complete record of a required rule', () => {
-    expect(deviationProblems([RECORD], RULES, 30, '2026-09-10')).toStrictEqual(
-      [],
-    )
-  })
-
-  it.each([
-    ['route', 'record 0 has no route. Rule DEV-01.'],
-    ['approver', 'record 0 has no approver. Rule DEV-01.'],
-  ])('names a record with no %s', (field, problem) => {
-    expect(
-      deviationProblems([{ ...RECORD, [field]: '' }], RULES, 30, '2026-09-10'),
-    ).toStrictEqual([problem])
-  })
-
-  it('names a record of a mandatory rule', () => {
-    expect(
-      deviationProblems(
-        [{ ...RECORD, rule: 'ERR-01' }],
-        RULES,
-        30,
-        '2026-09-10',
-      ),
-    ).toStrictEqual([
-      'record 0 deviates from ERR-01, and a mandatory rule has no deviation. Rule DEV-01.',
-    ])
-  })
-
-  it('names a record past its expiry', () => {
-    expect(deviationProblems([RECORD], RULES, 30, '2026-09-21')).toStrictEqual([
-      'record 0 expired on 2026-09-20. Rule DEV-01.',
-    ])
-  })
-
-  it('names a record that lives past max_days', () => {
-    expect(
-      deviationProblems(
-        [{ ...RECORD, expiry: '2026-10-15' }],
-        RULES,
-        30,
-        '2026-09-10',
-      ),
-    ).toStrictEqual([
-      'record 0 lives 44 days, and deviation.max_days is 30. Rule DEV-01.',
     ])
   })
 })

@@ -1,6 +1,6 @@
 # The sources of the rules
 
-Each rule of `docs/agents/accessibility.md`, of `docs/agents/resilience.md`, and of `docs/agents/security.md` names its cause in one sentence. This file names the document behind that cause.
+Each rule of a rule file names its cause in one sentence. `RULE_FILES` in `scripts/rules.ts` is the list of the rule files. This file names the document behind that cause.
 
 Read this file before you change a rule. Read it also when you must know if the cause of a rule stays correct. The status of APCA and the status of the WCAG 3 draft change with no commit here. The plan limits of GitHub do the same.
 
@@ -59,7 +59,7 @@ Read this file before you change a rule. Read it also when you must know if the 
 - [FAA AC 25.1309-1A](https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_25.1309-1A.pdf), section 5. Each single failure is possible, and its probability does not change that. Isolate the parts, give a failure warning, and design the failure path. One of these alone is seldom sufficient. Rule FIT-01.
 - [IAEA INSAG-10, defence in depth](https://www-pub.iaea.org/MTCD/Publications/PDF/Pub1013e_web.pdf), paragraphs 19 to 23. When one level fails, the next level acts. The levels do not depend on each other. Rule BND-01.
 - [NASA NPR 7150.2D, SWE-134](https://swehb.nasa.gov/display/SWEHBVD/SWE-134+-+Safety-Critical+Software+Design+Requirements). Start and end in a known safe state. Integrity checks on each input. No single event starts a dangerous condition. Rules NET-03 and SAFE-01.
-- [NASA-HDBK-1002, fault management](https://www.nasa.gov/wp-content/uploads/2015/04/636372main_NASA-HDBK-1002_Draft.pdf), section 4.1.1.4. The safing strategy names the safe mode before the flight. The safe mode does not depend on the fault that started it. Rules BND-04 and ACT-01.
+- [NASA-HDBK-1002, fault management](https://www.nasa.gov/wp-content/uploads/2015/04/636372main_NASA-HDBK-1002_Draft.pdf), section 4.1.1.4. The safing strategy names the safe mode before the flight. The safe mode does not depend on the fault that started it. Rules BND-04 and RACT-01.
 - [The Ariane 5 flight 501 report](https://ocw.mit.edu/courses/16-355j-software-engineering-concepts-fall-2005/91f1e550b30b00ad797293f430220f18_ari5fail_ful_rep.pdf). The decision to stop the processor was the one that killed the flight. Recommendations R3, R6, and R7. Rules NET-04 and DET-02.
 - [The BEA report on AF447](https://bea.aero/fileadmin/documents/docspa/2009/f-cp090601.en/pdf/f-cp090601.en.pdf), section 1.6.9. The three control laws, from full protection to none. Each step drops named protections. The key `routes.modes`.
 - [The FAA review of the 737 MAX](https://www.faa.gov/sites/faa.gov/files/2022-08/737_RTS_Summary.pdf), safety items 1 and 2. Two sensors must agree, and one command only. Rule SAFE-05.

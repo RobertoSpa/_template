@@ -1,4 +1,4 @@
-import { pinNotes, recordProblems } from './depsChecks.ts'
+import { pinProblems, recordProblems } from './depsChecks.ts'
 import { describe, expect, it } from 'vitest'
 
 const policy = {
@@ -91,16 +91,37 @@ describe('recordProblems', () => {
   })
 })
 
-describe('pinNotes', () => {
-  it('names each dependency with a range', () => {
+describe('pinProblems', () => {
+  it('refuses each dependency with a range', () => {
     const json = {
       dependencies: { react: '^19.2.8' },
       devDependencies: { knip: '~6.35.1', vitest: '4.1.11' },
     }
 
-    expect(pinNotes(json)).toStrictEqual([
-      'react is ^19.2.8, not one version',
-      'knip is ~6.35.1, not one version',
+    expect(pinProblems(json)).toStrictEqual([
+      'react is ^19.2.8, not one version. Rule DEP-15.',
+      'knip is ~6.35.1, not one version. Rule DEP-15.',
     ])
+  })
+
+  it.each(['latest', 'next', '1', '1.2', 'github:a/b', '*'])(
+    'refuses the version %s, which is not one version',
+    (version) => {
+      expect(
+        pinProblems({ dependencies: { a: version }, devDependencies: {} }),
+      ).toStrictEqual([`a is ${version}, not one version. Rule DEP-15.`])
+    },
+  )
+
+  it('passes a version with a prerelease tag', () => {
+    expect(
+      pinProblems({ dependencies: { a: '2.0.0-beta.3' }, devDependencies: {} }),
+    ).toStrictEqual([])
+  })
+
+  it('passes dependencies that each have one version', () => {
+    expect(
+      pinProblems({ dependencies: { react: '19.3.0' }, devDependencies: {} }),
+    ).toStrictEqual([])
   })
 })

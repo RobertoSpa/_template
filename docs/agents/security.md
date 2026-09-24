@@ -43,7 +43,7 @@ The agent writes these five answers in its first message of the task.
 4. Name the files that the task will touch. Name the worst outcome if the change is incorrect.
 5. Name the stop condition. This is the observation that makes the agent stop and put a question to the user.
 
-The time-out before the merge is the command `pnpm security`. Its output is one line per gate, with the word `go` or `no-go`. The user reads that output in the proof paragraph of the pull request. No other list exists.
+The time-out before the merge is the command `pnpm gates`, which runs each pipeline. Its output is one line per gate, with the word `go` or `no-go`. The user reads that output in the proof paragraph of the pull request. No other list exists.
 
 ## 1 Source of truth
 
@@ -52,8 +52,9 @@ The time-out before the merge is the command `pnpm security`. Its output is one 
 - **SOT-03 (M, proven).** Each tool has its native configuration file at the path that its documentation gives. The policy file does not replace the native file. The policy file is the test of the native file. Cause: a tool that cannot read the policy file must have a file that it can read. Test: `pnpm security:policy`.
 - **SOT-04 (M, proven).** A change to `security/policy.yaml` is its own pull request. It touches no other file. Cause: a threshold that moves in the same commit as the code that broke it hides the break. Test: the pre-push hook refuses a branch that changes the policy file and one more file.
 - **SOT-05 (R, proven).** A number in the policy file moves only in the safe direction with no deviation record. A longer release age, a shorter deadline, and a smaller allowlist are safe. The other direction must have a deviation. Cause: SEC Rule 15c3-5 keeps the controls in the exclusive control of the firm. A threshold that loosens when the deadline is near is not a control. Test: `pnpm security:policy` compares the new file with the file on `main`.
-- **DOC-01 (M, proven).** Each rule line of this file names one layer. Cause: a rule with no layer is a rule with no owner. Test: `pnpm security:policy` refuses a rule line that it cannot parse.
-- **DOC-02 (M, proven).** A citation of a rule in a tracked file names a rule of one of the three rule files. The three are this file, `docs/agents/accessibility.md`, and `docs/agents/resilience.md`. A citation is the word `Rule` and an identifier. Cause: a renumber makes a citation that sends the reader to no rule. Test: `pnpm security:policy` reads each tracked file and refuses a citation that names no rule.
+- **DOC-01 (M, proven).** Each rule line of a rule file names one layer. Cause: a rule with no layer is a rule with no owner. Test: the policy gate of each pipeline refuses a rule line of its file that it cannot parse.
+- **DOC-02 (M, proven).** A citation of a rule in a tracked file names a rule of one of the rule files. `RULE_FILES` in `scripts/rules.ts` is the list of the rule files. A citation is the word `Rule` and an identifier. Cause: a renumber makes a citation that sends the reader to no rule. Test: `pnpm security:policy` reads each tracked file and refuses a citation that names no rule.
+- **DOC-03 (M, proven).** An identifier is a rule of one rule file only. A family of rules belongs to the file that used it first. The sequence is this file, `docs/agents/accessibility.md`, and `docs/agents/resilience.md`. A subsequent file puts its letter before the family, such as `ASOT` or `RSOT`. Cause: a citation of an identifier that two files hold sends the reader to two rules. Test: `pnpm security:policy` refuses an identifier that two rule files hold.
 
 ## 2 Repository and branch
 
@@ -79,7 +80,7 @@ The time-out before the merge is the command `pnpm security`. Its output is one 
 - **DEP-12 (R, proven).** A dependency with no release in `dependency.max_unmaintained_days` is replaced or removed. Cause: Scorecard `Maintained`. Test: `pnpm security:deps` reads the release date from the registry.
 - **DEP-13 (R, proven).** A dependency with an OpenSSF Scorecard score less than `dependency.scorecard_min` is not added. Cause: the score is the one number that a third party calculates. Test: `pnpm security:deps` reads the score from the deps.dev API.
 - **DEP-14 (M, proven).** A dependency is removed when its use is removed. A dependency with no import in `src/`, in `scripts/`, or in a configuration file is refused. Cause: dead code is attack area with no owner. Test: `knip`.
-- **DEP-15 (A, proven).** A dependency is pinned to one version in `package.json`, with no range. The lockfile pins the transitive versions. Cause: a range is a promise that the author of the dependency keeps and not the project. Test: `pnpm security:deps` reads `package.json`.
+- **DEP-15 (M, proven).** A dependency is pinned to one version in `package.json`, with no range. The lockfile pins the transitive versions. Cause: a range is a promise that the author of the dependency keeps and not the project. A range also lets a new install change the output of the build. Test: `pnpm security:deps` refuses a range.
 
 ## 4 Workflows
 
@@ -149,7 +150,7 @@ These are the human performance tools of the nuclear industry, applied to the ag
 - **HPT-02 (M, attested).** A command that the user must run goes through a three-way repeat-back. The agent writes the command. The user pastes the output. The agent writes what the output shows. A command with no pasted output did not run. Cause: a message with no repeat-back was not sent. Test: the agent does not continue without the output.
 - **HPT-03 (M, attested).** When a result is not the expected result, the agent stops. It puts the work in a safe state, and it puts the question to the user. It does not continue on an assumption. Cause: stop when unsure. Test: the message ends with a question.
 - **HPT-04 (M, attested).** When two readings disagree, the agent acts on the worse one. A passing test and a failing test are a failing test. Cause: conservative decision making. Test: the user reads the message.
-- **HPT-05 (M, attested).** Before a merge, the agent runs `pnpm security` and pastes its output in the chat. One `no-go` stops the merge. No answer is no-go. Cause: the launch status check. Test: the proof paragraph of the pull request holds the same output.
+- **HPT-05 (M, attested).** Before a merge, the agent runs `pnpm gates` and pastes its output in the chat. One `no-go` stops the merge. No answer is no-go. Cause: the launch status check. Test: the proof paragraph of the pull request holds the same output.
 - **HPT-06 (M, attested).** During a deploy or a release, the agent does nothing else. No unrelated file, no unrelated question. Cause: the sterile flight deck rule. Test: the diff of the release pull request holds only the release.
 - **HPT-07 (M, attested).** Any person stops the line. If the user or the agent sees a defect, the work stops, and the defect goes first. A stop is not a fault. Cause: the andon cord. Test: the count of stops is a health number, and a count of 0 is a problem.
 - **HPT-08 (M, attested).** An alert with no owner and no action is deleted. Cause: Knight Capital got 97 emails before the open and no one acted. Test: each alert in the workflows names an owner and an action.
@@ -166,9 +167,9 @@ A never-event is reportable regardless of the outcome. The list is `incident.nev
 
 ## 12 Deviations
 
-- **DEV-01 (M, proven).** A deviation record in `security/deviations.yaml` has six fields. The rule identifier, the rationale, the risk, the name of the user as approver, the date, and the expiry. Cause: MISRA Compliance:2020. Test: `pnpm security:policy` reads the file and refuses a record with a missing field or a past expiry.
+- **DEV-01 (M, proven).** A deviation record has seven fields. The rule identifier, the place, the rationale, the risk, the name of the user as approver, the date, and the expiry. The place names the one route, file, package, or key of the record, and not a pattern. Each pipeline keeps its records in the file of `deviation.file` of its policy, and `scripts/deviations.ts` reads each one. Cause: MISRA Compliance:2020. Test: the policy gate of each pipeline refuses a record with a missing field or a pattern in the place.
 - **DEV-02 (M, proven).** A mandatory rule has no deviation record. A record that names a mandatory rule is a refusal. Test: `pnpm security:policy`.
-- **DEV-03 (M, proven).** A deviation that expires is a refusal on the next run. The cure is a fix or a new record with a new approval. Cause: an MEL item past its deadline grounds the aircraft. Test: `pnpm security:policy`.
+- **DEV-03 (M, proven).** A deviation that expires is a refusal on the next run. The cure is a fix or a new record with a new approval. A date after today, an expiry before the date, and a day that the calendar does not have are also refusals. A gate uses only a record that has not expired. Cause: an MEL item past its deadline grounds the aircraft. Test: `pnpm security:policy`.
 
 ## Sources
 

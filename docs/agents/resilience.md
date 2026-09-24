@@ -2,7 +2,7 @@
 
 This file holds the rules of the resilience pipeline. The file `resilience/policy.yaml` holds each number, each list, and each path. A rule names a key of that file and not a value. If a rule and the policy file disagree, the policy file wins. Then correct the rule.
 
-The two other pipelines stop a defect before the merge and give the response after a failure. This pipeline holds the third part. It says what the software does while one part of it is broken. The rules come from the industries where one failure kills a person or costs millions. Aviation, nuclear power, space flight, medical devices, rail, and finance are the sources. The strictest programming communities give the error model. Go, Rust, Erlang, Elm, and Zig are the sources. The last section names each document.
+The other pipelines stop a defect before the merge and give the response after a failure. This pipeline holds a different part. It says what the software does while one part of it is broken. The rules come from the industries where one failure kills a person or costs millions. Aviation, nuclear power, space flight, medical devices, rail, and finance are the sources. The strictest programming communities give the error model. Go, Rust, Erlang, Elm, and Zig are the sources. The last section names each document.
 
 Each source states one principle in its own words. Count each single part as a part that fails, and do not read its probability. Keep the failure in one region. Detect the failure. Go to a safe state that the failed part does not touch. Simulate the failure in a test, or count the failure as present.
 
@@ -17,9 +17,7 @@ If a rule here and one of these files disagree, the other file wins. Then correc
 
 ## How to read a rule
 
-The section "How to read a rule" of `docs/agents/security.md` gives the identifier, the category, the layer, the cause, and the test. The three categories are M, R, and A. The three layers are impossible, proven, and attested. A rule of this file uses the same names.
-
-No answer is no-go. If a test gives no answer, the answer is no.
+The section "How to read a rule" of `docs/agents/security.md` gives the identifier, the category, the layer, the cause, and the test. The three categories are M, R, and A. The three layers are impossible, proven, and attested. A rule of this file uses the same names. That section also gives the rule that no answer is no-go.
 
 ## Three words
 
@@ -31,17 +29,16 @@ This file uses three words for three things, and it does not interchange them.
 
 ## 1 Source of truth
 
-- **SOT-01 (M, proven).** Each number, each list, and each path of the pipeline lives in `resilience/policy.yaml`. Cause: two copies of a number become different. Test: `pnpm resilience:policy` reads each tool configuration and refuses a value that disagrees with the policy file.
-- **SOT-02 (M, proven).** The command `pnpm resilience` is the one entry point. It runs each gate in the sequence that `gates` gives. Cause: a gate that CI runs and the laptop does not is a gate that no person sees before the push. Test: the workflow file has one resilience step, and it is `pnpm resilience`.
-- **SOT-03 (M, proven).** A change to `resilience/policy.yaml` is its own pull request. It touches no other file. Cause: a limit that moves in the same commit as the code that broke it hides the break. Test: `.githooks/pre-push` refuses a branch that changes the policy file and one more file.
-- **SOT-04 (R, proven).** A number in the policy file moves only in the safe direction with no deviation record. A shorter timeout, fewer retries, and fewer resets are safe. The other direction must have a record. Cause: a control that loosens when the deadline is near is not a control. Test: `pnpm resilience:policy` compares the new file with the file on `main`.
-- **SOT-05 (M, proven).** No rule of this file holds a word of `ambiguous_words` of `a11y/policy.yaml`. Cause: INCOSE refuses a rule that no person can test. Test: `pnpm resilience:policy` reads this file.
+- **RSOT-01 (M, proven).** Each number, each list, and each path of the pipeline lives in `resilience/policy.yaml`. Cause: two copies of a number become different. Test: `pnpm resilience:policy` reads each tool configuration and refuses a value that disagrees with the policy file.
+- **RSOT-02 (M, proven).** The command `pnpm resilience` is the one entry point. It runs each gate in the sequence that `gates` gives. Cause: a gate that CI runs and the laptop does not is a gate that no person sees before the push. Test: the workflow file has one resilience step, and it is `pnpm resilience`. The pre-push hook runs only the gates `policy` and `routes`, because the gate `fault` starts a browser and runs for minutes. CI runs each gate.
+- **RSOT-03 (M, proven).** A change to `resilience/policy.yaml` is its own pull request. It touches no other file. Cause: a limit that moves in the same commit as the code that broke it hides the break. Test: `.githooks/pre-push` refuses a branch that changes the policy file and one more file.
+- **RSOT-04 (R, proven).** A number in the policy file moves only in the safe direction with no deviation record. A shorter timeout, fewer retries, and fewer resets are safe. The other direction must have a record. Cause: a control that loosens when the deadline is near is not a control. Test: `pnpm resilience:policy` compares the new file with the file on `origin/main`.
 
 ## 2 The error model
 
 - **ERR-01 (M, proven).** Two classes of failure exist. An expected failure is a returned `Result`. A bug is a thrown `Error`, and no code below a boundary catches it. Cause: Duffy, the error model of Midori. A bug that becomes a recoverable error continues with a broken invariant. In `src/`, `assert` is `src/shared/lib/assert.ts`. In `scripts/`, it is `node:assert`. Test: `eslint` refuses a `throw` that is not `assert` and is not in a file of `error.throw_allowed_in`.
 - **ERR-02 (M, impossible).** The type `Result` lives in `error.result_file`. It is `{ ok: true, value }` or `{ ok: false, error }`. No other shape of a result exists. Cause: Go, errors are values. Test: the type. A second shape does not compile against a caller that reads the first.
-- **ERR-03 (M, impossible).** One error type exists, in `error.file`. Its field `code` is a closed union. A code does not get a new name, and no one removes a code. Cause: the Azure REST guidelines. A code is the contract, because the callers compare against it. Test: `pnpm resilience:policy` compares the codes with the codes on `main` and refuses a missing code.
+- **ERR-03 (M, impossible).** One error type exists, in `error.file`. Its field `code` is a closed union. A code does not get a new name, and no one removes a code. Cause: the Azure REST guidelines. A code is the contract, because the callers compare against it. Test: `pnpm resilience:policy` compares the codes with the codes on `origin/main` and refuses a missing code.
 - **ERR-04 (M, proven).** Each code has one message for the user in `error.file`. The message has two sentences. The first names what failed, and the second is the action of the user. Cause: Therac-25 showed `MALFUNCTION 54`, and the operator continued. Test: `pnpm resilience:policy` refuses a code with no message and a message that is not two sentences.
 - **ERR-05 (M, proven).** A caught value goes through the one parser in `error.parser`. That parser is the only place that reads the type `unknown`. No other code reads a caught value. Cause: rule CODE-05 of the security rules. A parser makes a named type from a hole. Test: `eslint` refuses a `catch` clause that does not start with a call of the parser.
 - **ERR-06 (M, proven).** Each promise is awaited or returned. No promise floats. Cause: PEP 20, an error does not pass with no report. A floating promise makes a rejected result into nothing. Test: `no-floating-promises` with the option `ignoreVoid` set to false.
@@ -91,18 +88,18 @@ This file uses three words for three things, and it does not interchange them.
 
 Section 10 of `docs/agents/security.md` holds the behavior of the agent. Its rule HPT-03 stops the work on a result that is not the expected result. Its rule HPT-09 refuses a weaker control near a deadline. Each one applies here with no change. These two rules are the ones that it does not have.
 
-- **ACT-01 (M, attested).** The sign-in names the safe mode of each route that the task touches. Cause: NASA-HDBK-1002, the safing strategy names the safe mode before the flight. Test: the user reads the first message.
-- **ACT-02 (M, attested).** The agent does not add a `catch` to make a test pass. If a test fails on a thrown error, the fix is a `Result` at the source of the error. Cause: rule HPT-09. A `catch` that hides a failure is a weaker control. Test: the user reads the diff.
+- **RACT-01 (M, attested).** The sign-in names the safe mode of each route that the task touches. Cause: NASA-HDBK-1002, the safing strategy names the safe mode before the flight. Test: the user reads the first message.
+- **RACT-02 (M, attested).** The agent does not add a `catch` to make a test pass. If a test fails on a thrown error, the fix is a `Result` at the source of the error. Cause: rule HPT-09. A `catch` that hides a failure is a weaker control. Test: the user reads the diff.
 
 ## 9 Incidents and never-events
 
-A never-event opens an incident on the same day, and the outcome does not change that. The list is `incident.never_events`. Section 11 of `docs/agents/security.md` holds the postmortem, its deadline, and its file name. Rule INC-02 of `docs/agents/accessibility.md` adds a test for each defect that a user reports. Each one applies here with no change. Here that test is a fault case, a route record, or a code. This section adds no rule.
+A never-event opens an incident on the same day, and the outcome does not change that. The list is `incident.never_events`. Section 11 of `docs/agents/security.md` holds the postmortem, its deadline, and its file name. Rule AINC-02 of `docs/agents/accessibility.md` adds a test for each defect that a user reports. Each one applies here with no change. Here that test is a fault case, a route record, or a code. This section adds no rule.
 
 ## 10 Deviations
 
 Section 12 of `docs/agents/security.md` holds the deviation machinery. A mandatory rule has no record. An expired record is a refusal. Each one applies to `deviation.file` with no change. This rule is the one that it does not have.
 
-- **DEV-01 (M, proven).** A record in `deviation.file` has the field `route`. Cause: a resilience deviation holds for one route and not for the whole project. Test: `pnpm resilience:policy`.
+- **RDEV-01 (M, proven).** A deviation from a rule of this file is a record in `deviation.file`. Rules DEV-01 to DEV-03 of `docs/agents/security.md` give its seven fields, its approval, and its expiry. The field `place` names one route. Cause: a resilience deviation holds for one route and not for the whole project. Test: `pnpm resilience:policy`.
 
 ## Sources
 
