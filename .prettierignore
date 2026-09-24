@@ -8,3 +8,5 @@ graphify-out
 .impeccable
 reports/
 .stryker-tmp/
+# The local permissions of Claude Code. Git ignores it, and CI never sees it.
+.claude/settings.local.json
