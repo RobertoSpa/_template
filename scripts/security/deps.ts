@@ -1,7 +1,7 @@
 import {
   type DependencyRecord,
   type PackageJson,
-  pinNotes,
+  pinProblems,
   recordProblems,
 } from './depsChecks.ts'
 import { type Policy } from './policyChecks.ts'
@@ -53,11 +53,12 @@ export const checkDeps = (policy: Policy): Outcome => {
   const records = readYaml<DependencyRecord[]>(policy.dependency.records)
   const problems = [
     ...recordProblems(policy.dependency, packageJson, records),
+    ...pinProblems(packageJson),
     ...knipProblems(),
     ...osvProblems(policy),
   ]
 
   assert(Array.isArray(records))
 
-  return { notes: pinNotes(packageJson), problems }
+  return { notes: [], problems }
 }

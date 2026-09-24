@@ -104,3 +104,28 @@ export const today = (): string => {
 
   return date
 }
+
+// The pre-push hook and CI compare with origin/main, so each pipeline does too.
+const BASE_REFS = ['origin/main', 'main']
+
+export const baseRef = (): string | undefined => {
+  assert(BASE_REFS.length > 0)
+
+  const found = BASE_REFS.find(
+    (ref) =>
+      execute('git', ['rev-parse', '--verify', '--quiet', ref]).status === 0,
+  )
+
+  assert(found === undefined || BASE_REFS.includes(found))
+
+  return found
+}
+
+export const onBase = (ref: string, path: string): string | undefined => {
+  assert(ref.length > 0)
+  assert(path.length > 0)
+
+  const shown = execute('git', ['show', `${ref}:${path}`])
+
+  return shown.status === 0 ? shown.output : undefined
+}

@@ -37,7 +37,7 @@ The categories come from MISRA Compliance:2020.
 
 The criteria field names each WCAG criterion that the rule holds up. A rule that holds up the pipeline itself has the word `project` in that field.
 
-No answer is no-go. If a test gives no answer, the answer is no.
+The section "How to read a rule" of `docs/agents/security.md` gives the rule that no answer is no-go.
 
 ## The three layers
 
@@ -59,17 +59,17 @@ The WHO surgical checklist stops the work before the first cut. The agent writes
 4. Name each attestation record that this change makes stale.
 5. Name the stop condition. This is the observation that makes the agent stop and put a question to the user.
 
-The time-out before the merge is the command `pnpm a11y`. Its output is one line for each gate, with the word `go` or `no-go`.
+The time-out before the merge is the command `pnpm gates`, which runs this pipeline and each other pipeline. Its output is one line for each gate, with the word `go` or `no-go`.
 
 ## 1 Source of truth
 
-- **SOT-01 (M, proven, project).** Each number, each list, and each date of the pipeline lives in `a11y/policy.yaml`. Cause: two copies of a number become different. Test: `pnpm a11y:policy` reads each tool configuration and refuses a value that disagrees with the policy file.
-- **SOT-02 (M, proven, project).** The command `pnpm a11y` is the one entry point. It runs each gate in the sequence that `gates` gives. Cause: a gate that CI runs and the laptop does not is a gate that no person sees before the push. Test: the workflow file has one accessibility step, and it is `pnpm a11y`.
-- **SOT-03 (M, proven, project).** Each tool keeps its native configuration file. The policy file does not replace the native file. The policy file is the test of the native file. Cause: a tool that cannot read the policy file must have a file that it can read. Test: `pnpm a11y:policy`.
-- **SOT-04 (M, proven, project).** A change to `a11y/policy.yaml` is its own pull request. It touches no other file. Cause: a limit that moves in the same commit as the code that broke it hides the break. Test: `.githooks/pre-push` refuses a branch that changes the policy file and one more file.
-- **SOT-05 (R, proven, project).** A number in the policy file moves only in the safe direction with no deviation record. A higher contrast ratio, a larger target, and a shorter attestation life are safe. The other direction must have a record. Cause: a control that loosens when the deadline is near is not a control. Test: `pnpm a11y:policy` compares the new file with the file on `main`.
-- **SOT-06 (M, proven, project).** Each rule of this file names a WCAG criterion or the word `project`. One rule or more names each criterion in the scope of `conformance`. Cause: NASA SWE-072 makes the traceability bidirectional. A criterion with no rule is a gap, and a rule with no criterion is work that no standard made necessary. Test: `pnpm a11y:policy` reads this file and the policy file, then lists each orphan in the two directions.
-- **SOT-07 (M, proven, project).** No rule of this file holds a word of `ambiguous_words`. Cause: INCOSE refuses a rule that no person can test. A word of that list gives no test. Test: `pnpm a11y:policy` reads this file.
+- **ASOT-01 (M, proven, project).** Each number, each list, and each date of the pipeline lives in `a11y/policy.yaml`. Cause: two copies of a number become different. Test: `pnpm a11y:policy` reads each tool configuration and refuses a value that disagrees with the policy file.
+- **ASOT-02 (M, proven, project).** The command `pnpm a11y` is the one entry point. It runs each gate in the sequence that `gates` gives. Cause: a gate that CI runs and the laptop does not is a gate that no person sees before the push. Test: the workflow file has one accessibility step, and it is `pnpm a11y`.
+- **ASOT-03 (M, proven, project).** Each tool keeps its native configuration file. The policy file does not replace the native file. The policy file is the test of the native file. Cause: a tool that cannot read the policy file must have a file that it can read. Test: `pnpm a11y:policy`.
+- **ASOT-04 (M, proven, project).** A change to `a11y/policy.yaml` is its own pull request. It touches no other file. Cause: a limit that moves in the same commit as the code that broke it hides the break. Test: `.githooks/pre-push` refuses a branch that changes the policy file and one more file.
+- **ASOT-05 (R, proven, project).** A number in the policy file moves only in the safe direction with no deviation record. A higher contrast ratio, a larger target, and a shorter attestation life are safe. The other direction must have a record. Cause: a control that loosens when the deadline is near is not a control. Test: `pnpm a11y:policy` compares the new file with the file on `main`.
+- **ASOT-06 (M, proven, project).** Each rule of this file names a WCAG criterion or the word `project`. One rule or more names each criterion in the scope of `conformance`. Cause: NASA SWE-072 makes the traceability bidirectional. A criterion with no rule is a gap, and a rule with no criterion is work that no standard made necessary. Test: `pnpm a11y:policy` reads this file and the policy file, then lists each orphan in the two directions.
+- **ASOT-07 (M, proven, project).** No rule of a rule file holds a word of `ambiguous_words`. Cause: INCOSE refuses a rule that no person can test. A word of that list gives no test. Test: `pnpm a11y:policy` reads each file of `RULE_FILES` in `scripts/rules.ts`.
 
 ## 2 Layers
 
@@ -240,17 +240,17 @@ Section 10 of `docs/agents/security.md` holds the behavior of the agent. Its rul
 
 A never-event opens an incident on the same day, and the outcome does not change that. The list is `incident.never_events`. Section 11 of `docs/agents/security.md` holds the postmortem, its deadline, its file name, and the rule that a change of a rule links the postmortem. Each one applies here with no change. These two rules are the ones that it does not have.
 
-- **INC-01 (M, attested, project).** A postmortem names the user that the defect stopped and the task that the user cannot do. A count of violations is not an impact. Cause: the important number is the person that cannot finish. Test: the user reads the file.
-- **INC-02 (M, proven, project).** A defect that a user reports adds a test to the proven layer, or a rule to the attested layer. Cause: SQLite adds a test for each bug. A defect with no new test returns. Test: the pull request that closes the ticket.
+- **AINC-01 (M, attested, project).** A postmortem names the user that the defect stopped and the task that the user cannot do. A count of violations is not an impact. Cause: the important number is the person that cannot finish. Test: the user reads the file.
+- **AINC-02 (M, proven, project).** A defect that a user reports adds a test to the proven layer, or a rule to the attested layer. Cause: SQLite adds a test for each bug. A defect with no new test returns. Test: the pull request that closes the ticket.
 
 ## 19 Deviations
 
 Section 12 of `docs/agents/security.md` holds the deviation machinery. A mandatory rule has no record. An expired record is a refusal. The record must have an approval from the user. Each one applies to `deviation.file` with no change. These rules are the ones that it does not have.
 
-- **DEV-01 (M, proven, project).** A record in `deviation.file` has the field `place`, which names the file, the component, or the route. The six other fields are the ones that the security rules give. Cause: an accessibility deviation holds for one place and not for the whole project. Test: `pnpm a11y:policy`.
-- **DEV-02 (M, proven, project).** A route in `criticality.deviation_forbidden` has no record. No rule of the category M has one. Cause: the class C1 and the category M are the two places where no price buys the exemption. Test: `pnpm a11y:policy`.
-- **DEV-03 (M, proven, project).** A record that passes its expiry is a refusal on the next run. The cure is a fix or a new record with a new approval. Cause: an aircraft with a deferred item past its date does not fly. Test: `pnpm a11y:policy`.
-- **DEV-04 (M, proven, project).** A record names the user that the deviation stops in its field `risk`. Cause: a deviation with no named user reads as a cost of 0. Test: `pnpm a11y:policy` refuses an empty field.
+- **ADEV-01 (M, proven, project).** A record in `deviation.file` has the seven fields of Rule DEV-01 of `docs/agents/security.md`. Its field `place` names the file, the component, or the route. Cause: an accessibility deviation holds for one place and not for the whole project. Test: `pnpm a11y:policy`.
+- **ADEV-02 (M, proven, project).** A route in `criticality.deviation_forbidden` has no record. No rule of the category M has one. Cause: the class C1 and the category M are the two places where no price buys the exemption. Test: `pnpm a11y:policy`.
+- **ADEV-03 (M, proven, project).** A record that passes its expiry is a refusal on the next run. The cure is a fix or a new record with a new approval. Cause: an aircraft with a deferred item past its date does not fly. Test: `pnpm a11y:policy`.
+- **ADEV-04 (M, proven, project).** A record names the user that the deviation stops in its field `risk`. Cause: a deviation with no named user reads as a cost of 0. Test: `pnpm a11y:policy` refuses an empty field.
 
 ## Sources
 

@@ -2,8 +2,6 @@ import { parseRules } from '../rules.ts'
 import {
   ambiguousWordProblems,
   criteriaInScope,
-  type Deviation,
-  deviationProblems,
   ruleShapeProblems,
   traceabilityProblems,
 } from './policyChecks.ts'
@@ -18,21 +16,10 @@ const CONFORMANCE = {
 const RULES_TEXT = [
   '# Rules',
   '',
-  '- **SOT-01 (M, proven, project).** The one entry point. Cause: one. Test: one.',
+  '- **ASOT-01 (M, proven, project).** The one entry point. Cause: one. Test: one.',
   '- **NAME-01 (M, proven, WCAG 1.1.1).** Each image has a text alternative. Cause: one. Test: one.',
   '- **COLOR-02 (R, attested, WCAG 1.4.6 + 4.1.2).** The pair obeys the minimum. Cause: one. Test: one.',
 ].join('\n')
-
-const deviationWith = (fields: Partial<Deviation>): Deviation => ({
-  approver: 'the user',
-  date: '2026-09-01',
-  expiry: '2026-09-20',
-  place: 'src/shared/ui/Button.tsx',
-  rationale: 'the vendor widget has no name prop',
-  risk: 'a screen reader user cannot name the control',
-  rule: 'COLOR-02',
-  ...fields,
-})
 
 describe('parseRules', () => {
   it('reads the identifier, the category, the layer, and the criteria', () => {
@@ -131,7 +118,7 @@ describe('ambiguousWordProblems', () => {
     const problems = ambiguousWordProblems(text, ['robust'])
 
     expect(problems).toHaveLength(1)
-    expect(problems[0]).toContain('Rule SOT-07')
+    expect(problems[0]).toContain('Rule ASOT-07')
   })
 
   it('reads a word of the list in any case', () => {
@@ -144,82 +131,5 @@ describe('ambiguousWordProblems', () => {
     const text = '- **KEY-01 (M, proven, project).** The robustness is high.'
 
     expect(ambiguousWordProblems(text, ['robust'])).toStrictEqual([])
-  })
-})
-
-describe('deviationProblems', () => {
-  const rules = parseRules(RULES_TEXT)
-
-  it('accepts a record with each field and a live expiry', () => {
-    expect(
-      deviationProblems([deviationWith({})], rules, 30, '2026-09-15'),
-    ).toStrictEqual([])
-  })
-
-  it('names each field that the record does not hold', () => {
-    const problems = deviationProblems(
-      [deviationWith({ rationale: '', risk: '   ' })],
-      rules,
-      30,
-      '2026-09-15',
-    )
-
-    expect(problems).toHaveLength(2)
-    expect(problems[0]).toContain('has no rationale')
-    expect(problems[1]).toContain('has no risk')
-  })
-
-  it('refuses a record that names a mandatory rule', () => {
-    const problems = deviationProblems(
-      [deviationWith({ rule: 'NAME-01' })],
-      rules,
-      30,
-      '2026-09-15',
-    )
-
-    expect(problems).toHaveLength(1)
-    expect(problems[0]).toContain('Rule DEV-02')
-  })
-
-  it('refuses a record that names a rule that does not exist', () => {
-    const problems = deviationProblems(
-      [deviationWith({ rule: 'GONE-01' })],
-      rules,
-      30,
-      '2026-09-15',
-    )
-
-    expect(problems).toHaveLength(1)
-    expect(problems[0]).toContain('which is not a rule')
-  })
-
-  it('refuses a record one day after its expiry', () => {
-    const problems = deviationProblems(
-      [deviationWith({})],
-      rules,
-      30,
-      '2026-09-21',
-    )
-
-    expect(problems).toHaveLength(1)
-    expect(problems[0]).toContain('Rule DEV-03')
-  })
-
-  it('accepts a record on the day of its expiry', () => {
-    expect(
-      deviationProblems([deviationWith({})], rules, 30, '2026-09-20'),
-    ).toStrictEqual([])
-  })
-
-  it('refuses a record that lives longer than the limit', () => {
-    const problems = deviationProblems(
-      [deviationWith({ date: '2026-09-01', expiry: '2026-10-10' })],
-      rules,
-      30,
-      '2026-09-15',
-    )
-
-    expect(problems).toHaveLength(1)
-    expect(problems[0]).toContain('lives 39 days')
   })
 })

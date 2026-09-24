@@ -1,5 +1,6 @@
 import {
   citationProblems,
+  collisionProblems,
   identifiersOf,
   isIdentifier,
   parseRules,
@@ -26,6 +27,18 @@ const SOURCES = [
     ].join('\n'),
   },
 ]
+
+describe('collisionProblems', () => {
+  it('refuses an identifier that two rule files hold', () => {
+    expect(collisionProblems(SOURCES, 'DOC-03')).toStrictEqual([
+      'SOT-01 is a rule of docs/agents/accessibility.md and docs/agents/security.md. Give the subsequent file its own prefix. Rule DOC-03.',
+    ])
+  })
+
+  it('passes identifiers that one rule file holds each', () => {
+    expect(collisionProblems([SOURCES[1]], 'DOC-03')).toStrictEqual([])
+  })
+})
 
 describe('isIdentifier', () => {
   it.each([

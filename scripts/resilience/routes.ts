@@ -1,4 +1,4 @@
-import { exists, type Outcome, readYaml } from '../a11y/shared.ts'
+import { exists, folders, type Outcome, readYaml } from '../a11y/shared.ts'
 import {
   pageComponentProblems,
   recordProblems,
@@ -16,23 +16,6 @@ const MODULE_FILE = /^([a-z][A-Za-z]*)\.tsx?$/u
 const PAGE_COMPONENT = /Page\.tsx$/u
 const UI_FOLDER = 'ui'
 const ENTRIES_MAX = 10_000
-
-const folders = (path: string): string[] => {
-  assert(path.length > 0)
-
-  if (!exists(path)) {
-    return []
-  }
-
-  const entries = readdirSync(path, { withFileTypes: true })
-
-  assert(entries.length <= ENTRIES_MAX)
-
-  return entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .toSorted()
-}
 
 const modules = (path: string): string[] => {
   assert(path.length > 0)

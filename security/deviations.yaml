@@ -1,2 +1,6 @@
 # One record per deviation from a required rule. Rule DEV-01 in docs/agents/security.md.
+#
+# A record has seven fields: rule, place, rationale, risk, approver, date, and
+# expiry. The field place names one route, file, package, or key. A mandatory
+# rule takes no record.
 []
