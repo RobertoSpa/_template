@@ -18,6 +18,10 @@ fail() {
   exit 1
 }
 
+if [ -n "$(git status --porcelain)" ]; then
+  fail 'FAIL-03: the gates read the working tree, and the push holds only commits. Commit or stash each change first.'
+fi
+
 while read -r local_ref local_sha remote_ref remote_sha; do
   if [ "$local_sha" = "$ZERO" ]; then
     continue
@@ -58,6 +62,11 @@ fi
 
 if ! pnpm resilience policy routes; then
   fail 'RSOT-02: a resilience gate is no-go. Read the lines above.'
+fi
+
+# The check of Rule BSOT-03 is in pnpm bundle, because a smaller budget goes with code.
+if ! pnpm bundle; then
+  fail 'BSOT-02: a bundle gate is no-go. Read the lines above.'
 fi
 
 log "OK $(git rev-parse --abbrev-ref HEAD)"

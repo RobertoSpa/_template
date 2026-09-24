@@ -1,0 +1,146 @@
+# Source of truth of the bundle pipeline. The rules are in docs/agents/bundle.md.
+# Each size is an integer of bytes. Rule BYTE-03.
+version: 1
+
+gates:
+  - policy
+  - size
+
+deviation:
+  file: bundle/deviations.yaml
+  max_days: 30
+
+# Vite reads this block through scripts/bundle/viteBuild.ts. Rule BSOT-01.
+build:
+  target: es2023
+  sourcemap: hidden
+  # Rule ASSET-01. The V8 team does not inline a script of more than 1 kB.
+  inline_max_bytes: 1024
+  # Rule BLD-02. The gate starts each build with these values and PATH only.
+  env:
+    LC_ALL: C
+    TZ: UTC
+
+measure:
+  brotli_quality: 11
+  sizes_file: bundle/sizes.json
+  # Vite writes the manifest and the module list here. No user downloads them.
+  skip_dir: .vite
+  # Rule MAP-01. The maps stay on the server.
+  skip_extensions:
+    - .map
+
+# Each file of the output matches one group. Rules BYTE-02, BUD-05, BUD-06.
+# A text group has compress: true. Its wire bytes are the Brotli size.
+files:
+  # The V8 team divides a script of more than 50 to 100 kB. One chunk that holds
+  # react and react-dom 19 has 221 755 raw and 59 107 wire bytes, and the two
+  # packages do not divide. These are the smallest round limits that hold them.
+  script:
+    extensions: [.js]
+    compress: true
+    max_wire: 65536
+    max_raw: 262144
+  style:
+    extensions: [.css]
+    compress: true
+    max_wire: 20480
+    max_raw: 102400
+  html:
+    extensions: [.html]
+    compress: true
+    # RFC 6928: the first round trip carries 10 packets, about 14 600 bytes.
+    max_wire: 14336
+    max_raw: 65536
+  vector:
+    extensions: [.svg]
+    compress: true
+    max_wire: 102400
+    max_raw: 409600
+  image:
+    extensions: [.avif, .webp]
+    compress: false
+    max_wire: 102400
+    max_raw: 102400
+    # Rule ASSET-02. A file name here passes with a different image format.
+    allowed_other: []
+  font:
+    extensions: [.woff2]
+    compress: false
+    max_wire: 30720
+    max_raw: 30720
+  data:
+    extensions: [.json]
+    compress: true
+    max_wire: 10240
+    max_raw: 10240
+
+# Rule BUD-01. Alex Russell, 2026, a 3 second load on the P75 phone.
+# JavaScript: 0.3 MiB of the JS-light class. Total: 1.2 MiB of the JS-heavy class.
+# loaded is each file that the route can load, lazy chunks too. It gets the same
+# 1.2 MiB, so a lazy chunk cannot move bytes out of each budget.
+ceiling:
+  js: 307200
+  css: 20480
+  total: 1258291
+  loaded: 1258291
+
+# Rules STG-03, STG-04, BUD-03. GSFC-STD-1000 Table 3.07-1 and SMC-T-002 Table 2.
+stage:
+  order:
+    - estimate
+    - analysis
+    - measured
+    - released
+  # The margin of each stage, in percent of the ceiling.
+  margin:
+    estimate: 50
+    analysis: 30
+    measured: 20
+    released: 5
+  lock_from: measured
+  slack_bytes: 2048
+
+# Rules GROW-01 and GROW-03. The Chromium size gate and the SRE budget policy.
+growth:
+  branch_max_bytes: 16384
+  # In percent of the free space of a route.
+  review_percent: 20
+
+# One record per route. Rules STG-01 and STG-02.
+# page is the folder of src/pages/ that renders the route. The route / of the
+# template has no page, and it loads the shell only. It is an estimate, because
+# a stage does not move back (Rule STG-03) and a clone needs the space.
+routes:
+  - path: /
+    stage: estimate
+    owner: RobertoSpa
+    budget:
+      js: 153600
+      css: 10240
+      total: 629145
+      loaded: 629145
+
+# The record of each dependency lives in security/dependencies.yaml, and each
+# version is fixed. Rules DEP-01 and DEP-15 of docs/agents/security.md.
+packages:
+  # Rules PKG-02 and BLD-05. Each one adds code for a browser that build.target excludes.
+  denied:
+    - '@vitejs/plugin-legacy'
+    - core-js
+    - regenerator-runtime
+    - whatwg-fetch
+
+shake:
+  # Rule SHAKE-01. The field sideEffects of package.json.
+  side_effects:
+    - '*.css'
+  # Rule SHAKE-04. A module id that holds one of these is test code.
+  test_patterns:
+    - .test.
+    - .spec.
+    - .e2e.
+    - .integration.
+    - /e2e/
+    - '@testing-library/'
+    - /vitest/

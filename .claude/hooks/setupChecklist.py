@@ -10,6 +10,7 @@ LOG_LINES_MAX = 2000
 LOG_PATH = Path.home() / ".local/state/script-logs/setupChecklist.log"
 SOURCE_FILES_MAX = 5000
 STEP_PREFIX = "- [ ] "
+DEPLOY_FILES = ("vercel.json", ".vercel", "netlify.toml", "wrangler.toml", "fly.toml")
 
 
 def log(message):
@@ -99,6 +100,25 @@ def page_files(root):
     return found
 
 
+def bundle_route_stages(root):
+    assert isinstance(root, Path)
+    path = root / "bundle/policy.yaml"
+    if not path.is_file():
+        return []
+    lines = path.read_text(encoding="utf-8").splitlines()
+    # A route record indents its stage by four spaces. The top-level block stage: has none.
+    stages = [line.split(":", 1)[1].strip().strip("'\"") for line in lines if line.startswith("    stage:")]
+    assert len(stages) <= len(lines)
+    return stages
+
+
+def deploy_target_exists(root):
+    assert isinstance(root, Path)
+    found = [name for name in DEPLOY_FILES if (root / name).exists()]
+    assert len(found) <= len(DEPLOY_FILES)
+    return len(found) > 0
+
+
 def conditions(root):
     assert isinstance(root, Path)
     sources = source_files(root)
@@ -120,6 +140,10 @@ def conditions(root):
             root, "resilience/routes.yaml"
         )
         and len(page_files(root)) > 0,
+        "first page ships": len(bundle_route_stages(root)) > 0
+        and not any(stage in ("measured", "released") for stage in bundle_route_stages(root))
+        and len(page_files(root)) > 0,
+        "deploy target exists": deploy_target_exists(root),
         "first interactive component exists": package_lacks(root, "axe-core")
         and len(ui_primitives(root)) > 0,
         "palette is complete": package_lacks(root, "apca-w3")
@@ -129,7 +153,7 @@ def conditions(root):
         )
         and len(ui_primitives(root)) > 0,
     }
-    assert len(live) == 11
+    assert len(live) == 13
     return live
 
 

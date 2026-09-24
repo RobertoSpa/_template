@@ -8,6 +8,13 @@ updates:
     cooldown:
       default-days: 7
     groups:
+      # These packages change the output. Their pull request needs pnpm bundle:write. Rule BSOT-05.
+      bundle:
+        patterns:
+          - '@vitejs/plugin-react'
+          - react
+          - react-dom
+          - vite
       minor-and-patch:
         update-types:
           - minor

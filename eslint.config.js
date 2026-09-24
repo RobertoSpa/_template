@@ -3,6 +3,7 @@ import {
   a11yPrimitiveSinks,
   a11ySinks,
 } from './eslint-rules/accessibilityConfig.js'
+import { bundleBlocks } from './eslint-rules/bundleConfig.js'
 import {
   bannedEverywhere,
   bannedInTests,
@@ -247,6 +248,7 @@ export default ts.config(
     rules: { 'no-restricted-imports': 'off' },
   },
   ...resilienceBlocks,
+  ...bundleBlocks,
   {
     files: ['**/*.{test,spec}.{ts,tsx}'],
     plugins: { vitest },

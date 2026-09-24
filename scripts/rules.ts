@@ -27,6 +27,7 @@ const LINES_MAX = 100_000
 // The one list of rule files. `pnpm explain` and the citation check read it.
 export const RULE_FILES = [
   'docs/agents/accessibility.md',
+  'docs/agents/bundle.md',
   'docs/agents/resilience.md',
   'docs/agents/security.md',
 ]

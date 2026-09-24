@@ -16,12 +16,16 @@
     "a11y:tokens": "node scripts/accessibility.ts tokens",
     "a11y:tree": "node scripts/accessibility.ts tree",
     "build": "vite build",
+    "bundle": "node scripts/bundle.ts",
+    "bundle:policy": "node scripts/bundle.ts policy",
+    "bundle:size": "node scripts/bundle.ts size",
+    "bundle:write": "node scripts/bundle.ts write",
     "check": "tsc --noEmit",
     "dev": "vite",
     "explain": "node scripts/explain.ts",
     "format": "prettier --write . && eslint . --fix",
     "gate:flaky": "bash scripts/repeatChangedTests.sh",
-    "gates": "pnpm a11y && pnpm security && pnpm resilience",
+    "gates": "pnpm a11y && pnpm security && pnpm resilience && pnpm bundle",
     "lint": "prettier --check . && eslint . --max-warnings 0",
     "lint:fsd": "steiger ./src",
     "prepare": "git config core.hooksPath .githooks && playwright install chromium",
@@ -75,5 +79,8 @@
     "vite": "8.3.0",
     "vitest": "4.1.11",
     "yaml": "2.9.1"
-  }
+  },
+  "sideEffects": [
+    "*.css"
+  ]
 }

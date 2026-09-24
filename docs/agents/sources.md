@@ -82,3 +82,18 @@ Read this file before you change a rule. Read it also when you must know if the 
 - [The React reference, error boundaries](https://react.dev/reference/react/Component). React removes the tree on a render error. A boundary catches no event handler and no asynchronous code. Rule BND-01.
 - [typescript-eslint, no-floating-promises](https://typescript-eslint.io/rules/no-floating-promises/) and [only-throw-error](https://typescript-eslint.io/rules/only-throw-error/). [The TSConfig reference, useUnknownInCatchVariables](https://www.typescriptlang.org/tsconfig/useUnknownInCatchVariables.html). Rules ERR-05 and ERR-06.
 - [The principles of chaos engineering](https://principlesofchaos.org/). Run the experiment continuously. Rule FIT-03.
+
+## The bundle rules
+
+- [Holzmann, The Power of Ten rules, NASA JPL](https://spinroot.com/gerard/pdf/P10exp.pdf). Rule 2 puts a fixed limit on each loop, and a limit that no tool can prove counts as violated. Rule 3 fixes the use of resources at the start. Rule 10 wants 0 warnings. Rules BLD-04, FAIL-01, and SPLIT-02.
+- [NASA GSFC-STD-1000 Rev H](https://standards.nasa.gov/sites/default/files/standards/GSFC/H/0/GSFC-STD-1000RevH_Approved.pdf), Table 3.07-1. The margin of code storage is 50%, 30%, and 20% for an estimate, an analysis, and a measurement. A waiver holds for the named elements only. Rules STG-03, STG-04, and BDEV-01.
+- [USAF SMC-T-002](https://everyspec.com/USAF/USAF-SMC/download.php?spec=SMC-T-002_08AUG2008.021557.PDF), Table 2. The mass margin decreases at each review. Rule STG-04.
+- [NASA SWE-126](https://swehb.nasa.gov/display/SWEHBVB/SWE-126+-+Waiver+and+Deviation+Considerations). Each relief has a rationale, a risk, and an approver. Rule BUD-04.
+- [MISRA Compliance:2020](https://misra.org.uk/app/uploads/2021/06/MISRA-Compliance-2020.pdf), sections 4.4 and 5.1. A required rule has a deviation record or no violation. Rule BUD-02.
+- [The Google SRE workbook, error budget policy](https://sre.google/workbook/error-budget-policy/). The releases stop while the budget is spent. One incident that uses 20% of the budget gets a postmortem. Rules GROW-02 and GROW-03.
+- [TigerBeetle, Tiger Style](https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/TIGER_STYLE.md). Put a limit on everything. Rule BYTE-02.
+- [Reproducible Builds, definition](https://reproducible-builds.org/docs/definition/). Two builds of the same source give the same bits. Rule BLD-01.
+- [The Chromium binary size trybot](https://chromium.googlesource.com/chromium/src/+/master/docs/speed/binary_size/android_binary_size_trybot.md). A commit adds 16 KB or less, and no symbol for a test goes into a release. Rules GROW-01 and SHAKE-04.
+- [Alex Russell, the performance inequality gap of 2026](https://infrequently.org/2025/11/performance-inequality-gap-2026/). The byte budgets for a load in 3 seconds on the P75 phone. Rule BUD-01.
+- [V8, the cost of JavaScript in 2019](https://v8.dev/blog/cost-of-javascript-2019). Divide a script of more than 50 to 100 kB, and do not inline a script of more than 1 kB. Rules BUD-05 and ASSET-01.
+- [RFC 6928](https://www.rfc-editor.org/rfc/rfc6928.html). The first answer of a TCP connection has 10 packets or fewer. The limit of the HTML file comes from that number. Rule BUD-06.

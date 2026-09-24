@@ -6,7 +6,7 @@ type Gates<P> = Record<string, (policy: P) => Outcome | Promise<Outcome>>
 
 const GATES_MAX = 10
 
-const report = (name: string, outcome: Outcome): boolean => {
+export const report = (name: string, outcome: Outcome): boolean => {
   assert(name.length > 0)
   assert(Array.isArray(outcome.problems))
 
