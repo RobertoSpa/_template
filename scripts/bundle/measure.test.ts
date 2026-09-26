@@ -19,12 +19,14 @@ const FILES = {
     extensions: ['.avif', '.webp'],
     max_raw: 100,
     max_wire: 100,
+    rule: 'BUD-06',
   },
   script: {
     compress: true,
     extensions: ['.js'],
     max_raw: 100,
     max_wire: 100,
+    rule: 'BUD-05',
   },
 }
 

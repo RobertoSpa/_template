@@ -9,6 +9,7 @@ export type FileGroup = {
   extensions: string[]
   max_raw: number
   max_wire: number
+  rule: string
 }
 export type Policy = {
   build: {

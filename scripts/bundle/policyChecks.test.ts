@@ -1,5 +1,6 @@
 import {
   extensionProblems,
+  fileRuleProblems,
   gateProblems,
   integerProblems,
   manifestProblems,
@@ -25,6 +26,7 @@ const policyWith = (changes: Partial<Policy> = {}): Policy => ({
       extensions: ['.js'],
       max_raw: 200,
       max_wire: 100,
+      rule: 'BUD-05',
     },
   },
   gates: ['policy', 'size'],
@@ -83,17 +85,40 @@ describe('extensionProblems', () => {
   it('refuses one extension in two groups', () => {
     expect(
       extensionProblems({
-        other: { compress: true, extensions: ['.js'], max_raw: 1, max_wire: 1 },
+        other: {
+          compress: true,
+          extensions: ['.js'],
+          max_raw: 1,
+          max_wire: 1,
+          rule: 'BUD-06',
+        },
         script: {
           compress: true,
           extensions: ['.js'],
           max_raw: 1,
           max_wire: 1,
+          rule: 'BUD-05',
         },
       }),
     ).toStrictEqual([
       'the extension .js is in two groups of files. Rule BYTE-02.',
     ])
+  })
+})
+
+describe('fileRuleProblems', () => {
+  it.each([
+    [{ rule: 'BUD-05' }, []],
+    [{ rule: 'BUD-06' }, []],
+    [{}, ['files.chunk has no rule. Rule BSOT-01.']],
+    [
+      { rule: 'SPLIT-01' },
+      [
+        'files.chunk.rule is SPLIT-01, and it must be BUD-05 or BUD-06. Rule BSOT-01.',
+      ],
+    ],
+  ])('a group %j gives %j', (group, wanted) => {
+    expect(fileRuleProblems({ chunk: group })).toStrictEqual(wanted)
   })
 })
 
