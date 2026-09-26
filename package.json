@@ -25,7 +25,7 @@
     "explain": "node scripts/explain.ts",
     "format": "prettier --write . && eslint . --fix",
     "gate:flaky": "bash scripts/repeatChangedTests.sh",
-    "gates": "pnpm a11y && pnpm security && pnpm resilience && pnpm bundle",
+    "gates": "node scripts/pipelines.ts",
     "lint": "prettier --check . && eslint . --max-warnings 0",
     "lint:fsd": "steiger ./src",
     "prepare": "git config core.hooksPath .githooks && playwright install chromium",

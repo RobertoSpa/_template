@@ -18,6 +18,25 @@ describe('runGates', () => {
     ).toBe(1)
   })
 
+  it('runs each gate after a no-go', async () => {
+    const ran: string[] = []
+    const gates = {
+      broken: () => {
+        ran.push('broken')
+
+        return { notes: [], problems: ['the check failed. Rule DEV-01.'] }
+      },
+      clean: () => {
+        ran.push('clean')
+
+        return { notes: [], problems: [] }
+      },
+    }
+
+    expect(await runGates(gates, { gates: ['broken', 'clean'] }, [])).toBe(1)
+    expect(ran).toStrictEqual(['broken', 'clean'])
+  })
+
   it('refuses a name that is not a gate, also a name that every object has', async () => {
     await expect(
       runGates(GATES, { gates: ['clean'] }, ['constructor']),
