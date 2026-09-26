@@ -1,10 +1,11 @@
+import { safeDirectionProblems } from '../directions.ts'
 import {
   codeRemovalProblems,
   codesOf,
   constantProblems,
   fallbackProblems,
+  limitsOf,
   messageProblems,
-  safeDirectionProblems,
 } from './policyChecks.ts'
 import { describe, expect, it } from 'vitest'
 
@@ -109,24 +110,45 @@ describe('safeDirectionProblems', () => {
     boundary: { fallback_delay_ms: 5_000, max_resets: 3 },
     network: { retry_budget_per_tab: 10, retry_max: 2, timeout_ms: 5_000 },
   }
+  const raised = {
+    boundary: { fallback_delay_ms: 5_000, max_resets: 2 },
+    network: { retry_budget_per_tab: 10, retry_max: 2, timeout_ms: 5_000 },
+  }
 
   it('gives no problem when each number stays or decreases', () => {
+    const main = {
+      boundary: { fallback_delay_ms: 5_000, max_resets: 4 },
+      network: { retry_budget_per_tab: 10, retry_max: 2, timeout_ms: 6_000 },
+    }
+
     expect(
-      safeDirectionProblems(now, {
-        boundary: { fallback_delay_ms: 5_000, max_resets: 4 },
-        network: { retry_budget_per_tab: 10, retry_max: 2, timeout_ms: 6_000 },
-      }),
+      safeDirectionProblems(limitsOf(now), limitsOf(main), 'RSOT-04', []),
     ).toStrictEqual([])
   })
 
   it('names a number that increases', () => {
     expect(
-      safeDirectionProblems(now, {
-        boundary: { fallback_delay_ms: 5_000, max_resets: 2 },
-        network: { retry_budget_per_tab: 10, retry_max: 2, timeout_ms: 5_000 },
-      }),
+      safeDirectionProblems(limitsOf(now), limitsOf(raised), 'RSOT-04', []),
     ).toStrictEqual([
-      'boundary.max_resets moves from 2 to 3, the unsafe direction. Rule RSOT-04 wants a deviation record.',
+      'boundary.max_resets moves from 2 to 3, the unsafe direction. Rule RSOT-04.',
+    ])
+  })
+
+  it('passes a number that increases with an RSOT-04 record for its key', () => {
+    expect(
+      safeDirectionProblems(limitsOf(now), limitsOf(raised), 'RSOT-04', [
+        { place: 'boundary.max_resets', rule: 'RSOT-04' },
+      ]),
+    ).toStrictEqual([])
+  })
+
+  it('refuses a number that increases with a record of a different rule', () => {
+    expect(
+      safeDirectionProblems(limitsOf(now), limitsOf(raised), 'RSOT-04', [
+        { place: 'boundary.max_resets', rule: 'BSOT-04' },
+      ]),
+    ).toStrictEqual([
+      'boundary.max_resets moves from 2 to 3, the unsafe direction. Rule RSOT-04.',
     ])
   })
 })

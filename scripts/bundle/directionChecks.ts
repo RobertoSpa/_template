@@ -1,11 +1,14 @@
 import { deviates, type Deviation } from '../deviations.ts'
+import {
+  type Direction,
+  type Limits,
+  safeDirectionProblems,
+} from '../directions.ts'
 import { POLICY_PATHS } from '../policies.ts'
 import { bytesOf } from './policyChecks.ts'
 import { KINDS, type Policy, type Route } from './shared.ts'
 import assert from 'node:assert'
 import { isDeepStrictEqual } from 'node:util'
-
-type Direction = 'larger' | 'smaller'
 
 const RECORDS_MAX = 1_000
 const LEAVES_MAX = 10_000
@@ -77,45 +80,10 @@ const listsOf = (policy: Policy): Array<[string, string[], Direction]> => {
   ]
 }
 
-const numberProblems = (now: Policy, base: Policy): string[] => {
-  const before = new Map(numbersOf(base).map(([key, value]) => [key, value]))
-
-  assert(before.size > 0)
-
-  return numbersOf(now).flatMap(([key, value, safe]) => {
-    const old = before.get(key)
-
-    if (old === undefined || old === value) {
-      return []
-    }
-
-    const unsafe = safe === 'smaller' ? value > old : value < old
-
-    return unsafe
-      ? [
-          `${key} moves from ${old} to ${value}, the unsafe direction. Rule BSOT-04.`,
-        ]
-      : []
-  })
-}
-
-const listProblems = (now: Policy, base: Policy): string[] => {
-  const before = new Map(listsOf(base).map(([key, items]) => [key, items]))
-
-  assert(before.size > 0)
-
-  return listsOf(now).flatMap(([key, items, safe]) => {
-    const old = before.get(key) ?? []
-    const added = items.filter((item) => !old.includes(item))
-    const removed = old.filter((item) => !items.includes(item))
-    const unsafe = safe === 'smaller' ? added : removed
-    const verb = safe === 'smaller' ? 'adds' : 'removes'
-
-    return unsafe.map(
-      (item) => `${key} ${verb} ${item}, the unsafe direction. Rule BSOT-04.`,
-    )
-  })
-}
+const limitsOf = (policy: Policy): Limits => ({
+  lists: listsOf(policy),
+  numbers: numbersOf(policy),
+})
 
 type Leaf = boolean | null | number | string
 
@@ -164,7 +132,7 @@ const fixedKeyProblems = (now: Policy, base: Policy): string[] => {
     .map((key) => `${key} changes, and it has no safe direction. Rule BSOT-04.`)
 }
 
-export const safeDirectionProblems = (
+export const policyDirectionProblems = (
   now: Policy,
   base: Policy,
   deviations: Deviation[],
@@ -172,17 +140,21 @@ export const safeDirectionProblems = (
   assert(deviations.length <= RECORDS_MAX)
   assert(base.routes.length > 0)
 
-  const problems = [
-    ...numberProblems(now, base),
-    ...listProblems(now, base),
-    ...fixedKeyProblems(now, base),
-  ]
-
-  return problems.filter((problem) => {
+  const fixed = fixedKeyProblems(now, base).filter((problem) => {
     const key = problem.split(' ')[0]
 
     return !deviates(deviations, 'BSOT-04', key)
   })
+
+  return [
+    ...safeDirectionProblems(
+      limitsOf(now),
+      limitsOf(base),
+      'BSOT-04',
+      deviations,
+    ),
+    ...fixed,
+  ]
 }
 
 // The policy with each change that BSOT-03 permits undone, from the routes of base.

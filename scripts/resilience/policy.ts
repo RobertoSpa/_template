@@ -1,4 +1,9 @@
-import { deviationProblems, readDeviations } from '../deviations.ts'
+import {
+  type Deviation,
+  deviationProblems,
+  readDeviations,
+} from '../deviations.ts'
+import { safeDirectionProblems } from '../directions.ts'
 import { type Outcome } from '../gates.ts'
 import { baseRef, onBase } from '../git.ts'
 import { exists, readText, today } from '../io.ts'
@@ -9,8 +14,8 @@ import {
   codesOf,
   constantProblems,
   fallbackProblems,
+  limitsOf,
   messageProblems,
-  safeDirectionProblems,
 } from './policyChecks.ts'
 import { type Policy } from './shared.ts'
 import assert from 'node:assert'
@@ -98,8 +103,12 @@ const codeProblems = (policy: Policy): string[] => {
   return problems
 }
 
-const directionProblems = (policy: Policy): string[] => {
+const directionProblems = (
+  policy: Policy,
+  deviations: Deviation[],
+): string[] => {
   assert(policy.version >= 1)
+  assert(Array.isArray(deviations))
 
   const main = onMain(POLICY_PATHS.resilience)
 
@@ -107,7 +116,12 @@ const directionProblems = (policy: Policy): string[] => {
     return []
   }
 
-  return safeDirectionProblems(policy, parseYaml(main) as Policy)
+  return safeDirectionProblems(
+    limitsOf(policy),
+    limitsOf(parseYaml(main) as Policy),
+    'RSOT-04',
+    deviations,
+  )
 }
 
 export const checkPolicy = (policy: Policy): Outcome => {
@@ -121,7 +135,7 @@ export const checkPolicy = (policy: Policy): Outcome => {
     ...recordFilesProblems(policy),
     ...nativeProblems(policy),
     ...codeProblems(policy),
-    ...directionProblems(policy),
+    ...directionProblems(policy, deviations),
     ...deviationProblems(deviations, {
       ids: { expiry: 'RDEV-01', fields: 'RDEV-01', mandatory: 'RDEV-01' },
       maxDays: policy.deviation.max_days,

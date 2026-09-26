@@ -9,8 +9,8 @@ import { exists, folders, readText, readYaml, today } from '../io.ts'
 import { POLICY_PATHS, readPolicy } from '../policies.ts'
 import { parseRules, unparsedProblems } from '../rules.ts'
 import {
+  policyDirectionProblems,
   policyOnlyProblems,
-  safeDirectionProblems,
   stageDirectionProblems,
 } from './directionChecks.ts'
 import {
@@ -87,7 +87,7 @@ const baseProblems = (policy: Policy, deviations: Deviation[]): string[] => {
 
   return [
     ...policyOnlyProblems(changedFiles(ref), policy, base),
-    ...safeDirectionProblems(policy, base, deviations),
+    ...policyDirectionProblems(policy, base, deviations),
     ...stageDirectionProblems(policy.routes, base.routes, policy.stage.order),
   ]
 }
