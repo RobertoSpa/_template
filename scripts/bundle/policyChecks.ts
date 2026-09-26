@@ -23,6 +23,7 @@ const PERCENT = 100
 const RECORDS_MAX = 1_000
 // Each gate of pnpm bundle. write is a command, and not a gate.
 const GATE_NAMES = ['policy', 'size']
+const FILE_RULES = ['BUD-05', 'BUD-06']
 
 export const bytesOf = (policy: Policy): Array<[string, number]> => {
   assert(policy.routes.length > 0)
@@ -88,6 +89,28 @@ export const extensionProblems = (
     (extension) =>
       `the extension ${extension} is in two groups of files. Rule BYTE-02.`,
   )
+}
+
+export const fileRuleProblems = (
+  files: Record<string, { rule?: string }>,
+): string[] => {
+  assert(Object.keys(files).length > 0)
+
+  const problems = Object.entries(files).flatMap(([name, { rule }]) => {
+    if (rule === undefined) {
+      return [`files.${name} has no rule. Rule BSOT-01.`]
+    }
+
+    return FILE_RULES.includes(rule)
+      ? []
+      : [
+          `files.${name}.rule is ${rule}, and it must be ${FILE_RULES.join(' or ')}. Rule BSOT-01.`,
+        ]
+  })
+
+  assert(problems.length <= Object.keys(files).length)
+
+  return problems
 }
 
 export const manifestProblems = (

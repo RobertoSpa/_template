@@ -21,6 +21,7 @@ const policyWith = (changes: Partial<Policy> = {}): Policy => ({
       extensions: ['.js'],
       max_raw: 200,
       max_wire: 100,
+      rule: 'BUD-05',
     },
   },
   gates: ['policy', 'size'],

@@ -26,12 +26,14 @@ const SCRIPT = {
   extensions: ['.js'],
   max_raw: 200,
   max_wire: 100,
+  rule: 'BUD-05',
 }
 const FONT = {
   compress: false,
   extensions: ['.woff2'],
   max_raw: 50,
   max_wire: 50,
+  rule: 'BUD-06',
 }
 
 const sizesWith = (wire: number) => ({
@@ -84,6 +86,19 @@ describe('fileLimitProblems', () => {
         [],
       ),
     ).toStrictEqual(wanted)
+  })
+
+  it('names the rule of a renamed script group', () => {
+    expect(
+      fileLimitProblems(
+        { 'assets/index.js': { raw: 200, wire: 101 } },
+        { 'assets/index.js': 'chunk' },
+        { chunk: SCRIPT },
+        [],
+      ),
+    ).toStrictEqual([
+      'assets/index.js has 101 wire bytes, and files.chunk.max_wire is 100. Rule BUD-05.',
+    ])
   })
 
   it('names BUD-06 for a group that is not the script group', () => {

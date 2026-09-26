@@ -10,7 +10,6 @@ import {
 } from './shared.ts'
 import assert from 'node:assert'
 
-const SCRIPT_GROUP = 'script'
 const FILES_MAX = 10_000
 
 export const budgetOf = (
@@ -60,16 +59,6 @@ export const totalOf = (files: Record<string, Count>): Count => {
   return total
 }
 
-const ruleOfGroup = (group: string): string => {
-  assert(group.length > 0)
-
-  const rule = group === SCRIPT_GROUP ? 'BUD-05' : 'BUD-06'
-
-  assert(rule.startsWith('BUD-'))
-
-  return rule
-}
-
 const fileProblems = (
   name: string,
   count: Count,
@@ -78,8 +67,9 @@ const fileProblems = (
 ): string[] => {
   assert(count.raw >= 0)
   assert(count.wire >= 0)
+  assert(limits.rule.startsWith('BUD-'))
 
-  const rule = ruleOfGroup(group)
+  const { rule } = limits
   const problems: string[] = []
 
   if (count.wire > limits.max_wire) {
@@ -111,7 +101,7 @@ export const fileLimitProblems = (
 
     assert(groups[group] !== undefined, `${name} has no group`)
 
-    return deviates(deviations, ruleOfGroup(group), name)
+    return deviates(deviations, groups[group].rule, name)
       ? []
       : fileProblems(name, count, group, groups[group])
   })

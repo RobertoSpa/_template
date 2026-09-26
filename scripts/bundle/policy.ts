@@ -15,6 +15,7 @@ import {
 } from './directionChecks.ts'
 import {
   extensionProblems,
+  fileRuleProblems,
   gateProblems,
   integerProblems,
   manifestProblems,
@@ -103,6 +104,7 @@ export const checkPolicy = async (policy: Policy): Promise<Outcome> => {
     ...gateProblems(policy.gates),
     ...integerProblems(policy),
     ...extensionProblems(policy.files),
+    ...fileRuleProblems(policy.files),
     ...manifestProblems(manifest, policy),
     ...routeRecordProblems(policy, folders(PAGES_PATH), resiliencePathsOf()),
     ...viteProblems(await resolvedViteOf(), policy),
