@@ -1,6 +1,6 @@
 import {
+  policyDirectionProblems,
   policyOnlyProblems,
-  safeDirectionProblems,
   stageDirectionProblems,
 } from './directionChecks.ts'
 import { type Policy } from './shared.ts'
@@ -78,13 +78,13 @@ describe('stageDirectionProblems', () => {
   })
 })
 
-describe('safeDirectionProblems', () => {
+describe('policyDirectionProblems', () => {
   it('passes a smaller limit and a larger margin', () => {
     const now = policyWith({
       ceiling: { css: 900, js: 1_000, loaded: 3_000, total: 3_000 },
     })
 
-    expect(safeDirectionProblems(now, policyWith(), [])).toStrictEqual([])
+    expect(policyDirectionProblems(now, policyWith(), [])).toStrictEqual([])
   })
 
   it('refuses a larger limit with no deviation record', () => {
@@ -92,7 +92,7 @@ describe('safeDirectionProblems', () => {
       ceiling: { css: 1_001, js: 1_000, loaded: 3_000, total: 3_000 },
     })
 
-    expect(safeDirectionProblems(now, policyWith(), [])).toStrictEqual([
+    expect(policyDirectionProblems(now, policyWith(), [])).toStrictEqual([
       'ceiling.css moves from 1000 to 1001, the unsafe direction. Rule BSOT-04.',
     ])
   })
@@ -103,7 +103,7 @@ describe('safeDirectionProblems', () => {
     })
 
     expect(
-      safeDirectionProblems(now, policyWith(), [
+      policyDirectionProblems(now, policyWith(), [
         { place: 'ceiling.css', rule: 'BSOT-04' },
       ]),
     ).toStrictEqual([])
@@ -158,7 +158,7 @@ describe('safeDirectionProblems', () => {
     ],
   ])('refuses %s', (_title, changes, wanted) => {
     expect(
-      safeDirectionProblems(policyWith(changes), policyWith(), []),
+      policyDirectionProblems(policyWith(changes), policyWith(), []),
     ).toStrictEqual([wanted])
   })
 
@@ -166,7 +166,7 @@ describe('safeDirectionProblems', () => {
     const base = policyWith()
     const now = policyWith({ packages: { denied: [] } })
 
-    expect(safeDirectionProblems(now, base, [])).toStrictEqual([
+    expect(policyDirectionProblems(now, base, [])).toStrictEqual([
       'packages.denied removes core-js, the unsafe direction. Rule BSOT-04.',
     ])
   })

@@ -1,3 +1,4 @@
+import { type Limits } from '../directions.ts'
 import assert from 'node:assert'
 
 export type SafeNumbers = {
@@ -150,27 +151,22 @@ export const codeRemovalProblems = (
     )
 }
 
-export const safeDirectionProblems = (
-  now: SafeNumbers,
-  main: SafeNumbers,
-): string[] => {
-  assert(typeof now.network.timeout_ms === 'number')
-  assert(typeof main.network.timeout_ms === 'number')
+// A larger number in the resilience policy is the unsafe direction. Rule RSOT-04.
+export const limitsOf = (numbers: SafeNumbers): Limits => {
+  assert(typeof numbers.network.timeout_ms === 'number')
 
-  const problems: string[] = []
-
-  for (const [name, read] of SAFE_NUMBERS) {
-    const before = read(main)
-    const after = read(now)
-
-    if (after > before) {
-      problems.push(
-        `${name} moves from ${before} to ${after}, the unsafe direction. Rule RSOT-04 wants a deviation record.`,
-      )
-    }
+  const limits: Limits = {
+    lists: [],
+    numbers: SAFE_NUMBERS.map(([name, read]) => [
+      name,
+      read(numbers),
+      'smaller',
+    ]),
   }
 
-  return problems
+  assert(limits.numbers.length === SAFE_NUMBERS.length)
+
+  return limits
 }
 
 export const fallbackProblems = (
