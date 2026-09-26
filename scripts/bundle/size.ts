@@ -1,10 +1,11 @@
-import { type Outcome, readText } from '../a11y/shared.ts'
 import {
   type Deviation,
   liveDeviations,
   readDeviations,
 } from '../deviations.ts'
-import { baseRef, onBase, today } from '../security/shared.ts'
+import { type Outcome } from '../gates.ts'
+import { baseRef, onBase } from '../git.ts'
+import { readText, today } from '../io.ts'
 import { buildTwice, type Output } from './build.ts'
 import {
   countOf,

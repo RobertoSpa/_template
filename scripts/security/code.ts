@@ -1,5 +1,6 @@
+import { type Outcome } from '../gates.ts'
+import { execute, tail } from '../io.ts'
 import { type Policy } from './policyChecks.ts'
-import { execute, type Outcome, tail } from './shared.ts'
 import assert from 'node:assert'
 
 export const checkCode = (policy: Policy): Outcome => {

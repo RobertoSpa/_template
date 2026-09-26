@@ -1,4 +1,7 @@
 import { deviationProblems, readDeviations } from '../deviations.ts'
+import { type Outcome } from '../gates.ts'
+import { trackedFiles } from '../git.ts'
+import { exists, readText, readYaml, today } from '../io.ts'
 import {
   citationProblems,
   collisionProblems,
@@ -18,14 +21,6 @@ import {
   type Workspace,
   workspaceProblems,
 } from './policyChecks.ts'
-import {
-  exists,
-  type Outcome,
-  readText,
-  readYaml,
-  today,
-  trackedFiles,
-} from './shared.ts'
 import assert from 'node:assert'
 import { parse as parseToml } from 'smol-toml'
 

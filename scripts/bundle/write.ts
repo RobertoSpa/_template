@@ -1,11 +1,7 @@
-import { type Outcome, readText } from '../a11y/shared.ts'
-import {
-  type Budget,
-  KINDS,
-  type Policy,
-  POLICY_PATH,
-  type Sizes,
-} from './shared.ts'
+import { type Outcome } from '../gates.ts'
+import { readText } from '../io.ts'
+import { POLICY_PATHS } from '../policies.ts'
+import { type Budget, KINDS, type Policy, type Sizes } from './shared.ts'
 import { measure } from './size.ts'
 import { sizesTextOf } from './sizeChecks.ts'
 import assert from 'node:assert'
@@ -32,7 +28,7 @@ const lowerBudgets = (policy: Policy, sizes: Sizes): string[] => {
   assert(policy.routes.length > 0)
   assert(policy.stage.order.includes(policy.stage.lock_from))
 
-  const document = parseDocument(readText(POLICY_PATH))
+  const document = parseDocument(readText(POLICY_PATHS.bundle))
   const lockIndex = policy.stage.order.indexOf(policy.stage.lock_from)
   const notes: string[] = []
 
@@ -60,7 +56,7 @@ const lowerBudgets = (policy: Policy, sizes: Sizes): string[] => {
   if (notes.length > 0) {
     // No padding inside [ ], so the file stays in the format of Prettier.
     writeFileSync(
-      POLICY_PATH,
+      POLICY_PATHS.bundle,
       document.toString({ flowCollectionPadding: false }),
     )
   } else {

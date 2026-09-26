@@ -1,3 +1,5 @@
+import { type Outcome } from '../gates.ts'
+import { execute, readText, readYaml, tail } from '../io.ts'
 import {
   type DependencyRecord,
   type PackageJson,
@@ -5,7 +7,6 @@ import {
   recordProblems,
 } from './depsChecks.ts'
 import { type Policy } from './policyChecks.ts'
-import { execute, type Outcome, readText, readYaml, tail } from './shared.ts'
 import assert from 'node:assert'
 
 const PACKAGE_PATH = 'package.json'

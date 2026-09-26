@@ -1,5 +1,6 @@
+import { type Outcome } from '../gates.ts'
+import { exists, readYaml } from '../io.ts'
 import { type Policy } from './policyChecks.ts'
-import { exists, type Outcome, readYaml } from './shared.ts'
 import { pairProblems, targetProblems, type Tokens } from './tokensChecks.ts'
 import assert from 'node:assert'
 
@@ -14,8 +15,9 @@ export const checkTokens = (policy: Policy): Outcome => {
     }
   }
 
-  const tokens = readYaml<Tokens>(policy.tokens.file)
+  const tokens = readYaml<null | Tokens>(policy.tokens.file)
 
+  assert(tokens !== null, `${policy.tokens.file} is empty`)
   assert(Array.isArray(tokens.pairs))
 
   const problems = [

@@ -1,5 +1,6 @@
+import { type Outcome } from '../gates.ts'
+import { exists, readText } from '../io.ts'
 import { type Policy } from './policyChecks.ts'
-import { exists, type Outcome, readText } from './shared.ts'
 import assert from 'node:assert'
 
 const INDEX_PATH = 'index.html'

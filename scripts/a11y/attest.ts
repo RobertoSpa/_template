@@ -1,3 +1,5 @@
+import { type Outcome } from '../gates.ts'
+import { exists, readText, readYaml, today } from '../io.ts'
 import { parseRules } from '../rules.ts'
 import {
   type Attestation,
@@ -7,7 +9,6 @@ import {
   type RouteRecord,
 } from './attestChecks.ts'
 import { type Policy } from './policyChecks.ts'
-import { exists, type Outcome, readText, readYaml, today } from './shared.ts'
 import assert from 'node:assert'
 
 const RULES_PATH = 'docs/agents/accessibility.md'

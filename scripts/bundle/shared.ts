@@ -1,5 +1,4 @@
-import { type Outcome, readYaml } from '../a11y/shared.ts'
-import assert from 'node:assert'
+import { POLICY_PATHS } from '../policies.ts'
 import { join } from 'node:path'
 
 export type Budget = { css: number; js: number; loaded: number; total: number }
@@ -11,7 +10,6 @@ export type FileGroup = {
   max_raw: number
   max_wire: number
 }
-export type Gate = (policy: Policy) => Promise<Outcome>
 export type Policy = {
   build: {
     env: Record<string, string>
@@ -57,21 +55,11 @@ export type Sizes = {
 
 // Each budget kind. loaded counts each file that the route can load, lazy chunks too.
 export const KINDS = ['js', 'css', 'total', 'loaded'] as const
-export const POLICY_PATH = 'bundle/policy.yaml'
 export const RULES_PATH = 'docs/agents/bundle.md'
 
 // The gates run from the repository root. Only the Vite config needs an absolute path.
 export const ABSOLUTE_POLICY_PATH = join(
   import.meta.dirname,
   '../..',
-  POLICY_PATH,
+  POLICY_PATHS.bundle,
 )
-
-export const readPolicy = (path: string = POLICY_PATH): Policy => {
-  const policy = readYaml<Policy>(path)
-
-  assert(Array.isArray(policy.gates))
-  assert(policy.gates.length > 0)
-
-  return policy
-}

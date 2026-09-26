@@ -1,6 +1,7 @@
 import { deviates, type Deviation } from '../deviations.ts'
+import { POLICY_PATHS } from '../policies.ts'
 import { bytesOf } from './policyChecks.ts'
-import { KINDS, type Policy, POLICY_PATH, type Route } from './shared.ts'
+import { KINDS, type Policy, type Route } from './shared.ts'
 import assert from 'node:assert'
 import { isDeepStrictEqual } from 'node:util'
 
@@ -240,7 +241,7 @@ export const policyOnlyProblems = (
   assert(Array.isArray(changed))
   assert(base.routes.length > 0)
 
-  if (!changed.includes(POLICY_PATH) || changed.length === 1) {
+  if (!changed.includes(POLICY_PATHS.bundle) || changed.length === 1) {
     return []
   }
 
@@ -258,6 +259,6 @@ export const policyOnlyProblems = (
   }
 
   return [
-    `the branch changes ${POLICY_PATH} and ${changed.length - 1} more files. Only a smaller budget, a new or removed route record, a new page name, and a stage that moves forward can go with other files. Rule BSOT-03.`,
+    `the branch changes ${POLICY_PATHS.bundle} and ${changed.length - 1} more files. Only a smaller budget, a new or removed route record, a new page name, and a stage that moves forward can go with other files. Rule BSOT-03.`,
   ]
 }

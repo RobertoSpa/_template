@@ -1,4 +1,5 @@
-import { exists, folders, type Outcome, readYaml } from '../a11y/shared.ts'
+import { type Outcome } from '../gates.ts'
+import { exists, folders, readYaml } from '../io.ts'
 import {
   pageComponentProblems,
   recordProblems,

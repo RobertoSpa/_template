@@ -1,18 +1,13 @@
 import {
-  exists,
-  folders,
-  type Outcome,
-  readText,
-  readYaml,
-} from '../a11y/shared.ts'
-import {
   type Deviation,
   deviationProblems,
   readDeviations,
 } from '../deviations.ts'
-import { readPolicy as readResiliencePolicy } from '../resilience/shared.ts'
+import { type Outcome } from '../gates.ts'
+import { baseRef, changedFiles, onBase } from '../git.ts'
+import { exists, folders, readText, readYaml, today } from '../io.ts'
+import { POLICY_PATHS, readPolicy } from '../policies.ts'
 import { parseRules, unparsedProblems } from '../rules.ts'
-import { baseRef, changedFiles, onBase, today } from '../security/shared.ts'
 import {
   policyOnlyProblems,
   safeDirectionProblems,
@@ -29,7 +24,7 @@ import {
   viteProblems,
   workflowProblems,
 } from './policyChecks.ts'
-import { type Policy, POLICY_PATH, RULES_PATH } from './shared.ts'
+import { type Policy, RULES_PATH } from './shared.ts'
 import assert from 'node:assert'
 import { resolveConfig } from 'vite'
 import { parse as parseYaml } from 'yaml'
@@ -38,7 +33,9 @@ const WORKFLOW_PATH = '.github/workflows/bundle.yml'
 const PAGES_PATH = 'src/pages'
 
 const resiliencePathsOf = (): string[] => {
-  const { routes } = readResiliencePolicy()
+  const { routes } = readPolicy<{ gates: string[]; routes: { file: string } }>(
+    POLICY_PATHS.resilience,
+  )
   const records = readYaml<Array<{ path: string }> | null>(routes.file) ?? []
 
   assert(Array.isArray(records))
@@ -79,7 +76,7 @@ const baseProblems = (policy: Policy, deviations: Deviation[]): string[] => {
     return ['git has no main and no origin/main to compare with. Rule FAIL-01.']
   }
 
-  const text = onBase(ref, POLICY_PATH)
+  const text = onBase(ref, POLICY_PATHS.bundle)
 
   if (text === undefined) {
     return []

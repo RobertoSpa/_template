@@ -1,10 +1,11 @@
 import { checkPolicy } from './bundle/policy.ts'
-import { type Gate, readPolicy } from './bundle/shared.ts'
+import { type Policy } from './bundle/shared.ts'
 import { checkSize } from './bundle/size.ts'
 import { writeSizes } from './bundle/write.ts'
-import { report, runGates } from './gates.ts'
+import { type Gate, report, runGates } from './gates.ts'
+import { POLICY_PATHS, readPolicy } from './policies.ts'
 
-const GATES: Record<string, Gate> = {
+const GATES: Record<string, Gate<Policy>> = {
   policy: checkPolicy,
   size: checkSize,
 }
@@ -12,7 +13,7 @@ const GATES: Record<string, Gate> = {
 const WRITE = 'write'
 
 const argv = process.argv.slice(2)
-const policy = readPolicy()
+const policy = readPolicy<Policy>(POLICY_PATHS.bundle)
 
 process.exitCode =
   argv[0] === WRITE

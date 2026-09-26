@@ -1,7 +1,3 @@
-import { type Outcome, readYaml } from '../a11y/shared.ts'
-import assert from 'node:assert'
-
-export type Gate = (policy: Policy) => Outcome
 export type Policy = {
   boundary: {
     fallback_delay_ms: number
@@ -33,15 +29,4 @@ export type Policy = {
   }
   routes: { default_mode: string; file: string; modes: string[] }
   version: number
-}
-
-export const POLICY_PATH = 'resilience/policy.yaml'
-
-export const readPolicy = (): Policy => {
-  const policy = readYaml<Policy>(POLICY_PATH)
-
-  assert(Array.isArray(policy.gates))
-  assert(policy.gates.length > 0)
-
-  return policy
 }

@@ -1,6 +1,7 @@
+import { type Outcome } from '../gates.ts'
+import { exists, readYaml } from '../io.ts'
 import { type RouteRecord } from './attestChecks.ts'
 import { type Policy } from './policyChecks.ts'
-import { exists, type Outcome, readYaml } from './shared.ts'
 import assert from 'node:assert'
 
 const goldenProblems = (routes: RouteRecord[], directory: string): string[] => {
