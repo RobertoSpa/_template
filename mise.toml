@@ -3,4 +3,5 @@
 "aqua:google/osv-scanner" = "2.5.1"
 "aqua:rhysd/actionlint" = "1.7.12"
 "aqua:suzuki-shunsuke/pinact" = "5.0.0"
+node = "24.21.0"
 "ubi:zizmorcore/zizmor" = "1.30.1"

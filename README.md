@@ -15,7 +15,7 @@ no checkbox on purpose. A checkbox here travels to the next machine and reports
 work that no person did on that machine.
 
 1. Install `mise` with the package manager of the machine. Run `mise trust`,
-   then `mise install`, which gets the five tools of `mise.toml`. Add
+   then `mise install`, which gets the six tools of `mise.toml`. Add
    `mise activate` to the shell configuration, so that `pnpm security` finds
    the tools. The git hooks call `mise exec` and work without the activation.
 2. Turn on commit signing with an SSH key. Run the four commands below. Then
