@@ -1,6 +1,7 @@
+import { type Outcome } from '../gates.ts'
+import { execute, readYaml, tail } from '../io.ts'
 import { type Workflow, workflowProblems } from './actionsChecks.ts'
 import { type Policy } from './policyChecks.ts'
-import { execute, type Outcome, readYaml, tail } from './shared.ts'
 import assert from 'node:assert'
 import { readdirSync } from 'node:fs'
 

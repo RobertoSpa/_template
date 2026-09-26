@@ -1,6 +1,8 @@
+import { type Outcome } from '../gates.ts'
+import { trackedFiles } from '../git.ts'
+import { execute, tail } from '../io.ts'
 import { type Policy } from './policyChecks.ts'
 import { secretFileProblems } from './secretsChecks.ts'
-import { execute, type Outcome, tail, trackedFiles } from './shared.ts'
 import assert from 'node:assert'
 
 const gitleaksProblems = (): string[] => {

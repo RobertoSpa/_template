@@ -1,5 +1,5 @@
-import { exists, type Outcome } from '../a11y/shared.ts'
-import { execute, tail } from '../security/shared.ts'
+import { type Outcome } from '../gates.ts'
+import { execute, exists, tail } from '../io.ts'
 import { type Policy } from './shared.ts'
 import assert from 'node:assert'
 

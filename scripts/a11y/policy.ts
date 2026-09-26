@@ -1,4 +1,7 @@
 import { deviationProblems, readDeviations } from '../deviations.ts'
+import { type Outcome } from '../gates.ts'
+import { exists, readText, today } from '../io.ts'
+import { POLICY_PATHS } from '../policies.ts'
 import { parseRules, type Rule, RULE_FILES } from '../rules.ts'
 import {
   ambiguousWordProblems,
@@ -6,13 +9,11 @@ import {
   ruleShapeProblems,
   traceabilityProblems,
 } from './policyChecks.ts'
-import { exists, type Outcome, readText, today } from './shared.ts'
 import assert from 'node:assert'
 
 const RULES_PATH = 'docs/agents/accessibility.md'
 const ESLINT_PATH = 'eslint-rules/accessibilityConfig.js'
 const PACKAGE_PATH = 'package.json'
-const POLICY_PATH = 'a11y/policy.yaml'
 const UPDATE_FLAGS = ['--update-snapshots', '--update-snapshot']
 
 const recordFilesProblems = (policy: Policy): string[] => {
@@ -68,9 +69,9 @@ const eslintProblems = (policy: Policy): string[] => {
   const problems: string[] = []
   const config = readText(ESLINT_PATH)
 
-  if (!config.includes(POLICY_PATH)) {
+  if (!config.includes(POLICY_PATHS.a11y)) {
     problems.push(
-      `${ESLINT_PATH} does not read ${POLICY_PATH}. The policy is the one source of the rule list. Rule ASOT-03.`,
+      `${ESLINT_PATH} does not read ${POLICY_PATHS.a11y}. The policy is the one source of the rule list. Rule ASOT-03.`,
     )
   }
 

@@ -1,4 +1,5 @@
-import { ABSOLUTE_POLICY_PATH, readPolicy } from './shared.ts'
+import { readPolicy } from '../policies.ts'
+import { ABSOLUTE_POLICY_PATH, type Policy } from './shared.ts'
 import assert from 'node:assert'
 import { type BuildEnvironmentOptions, type Plugin } from 'vite'
 
@@ -6,7 +7,7 @@ export const MODULES_FILE = '.vite/modules.json'
 
 // Rule BSOT-01. Vite gets each number of its build block from the policy file.
 export const bundleBuild = (): BuildEnvironmentOptions => {
-  const { build } = readPolicy(ABSOLUTE_POLICY_PATH)
+  const { build } = readPolicy<Policy>(ABSOLUTE_POLICY_PATH)
 
   assert(build.target.length > 0)
   assert(Number.isInteger(build.inline_max_bytes))

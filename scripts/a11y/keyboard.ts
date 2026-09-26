@@ -1,5 +1,6 @@
+import { type Outcome } from '../gates.ts'
+import { exists, readYaml } from '../io.ts'
 import { type Policy } from './policyChecks.ts'
-import { exists, type Outcome, readYaml } from './shared.ts'
 import assert from 'node:assert'
 
 type Pattern = {
@@ -88,8 +89,9 @@ export const checkKeyboard = (policy: Policy): Outcome => {
     }
   }
 
-  const file = readYaml<PatternFile>(policy.patterns.file)
+  const file = readYaml<null | PatternFile>(policy.patterns.file)
 
+  assert(file !== null, `${policy.patterns.file} is empty`)
   assert(typeof file.patterns === 'object')
 
   const problems = patternProblems(file, policy.patterns.dual_model)

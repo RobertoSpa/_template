@@ -1,8 +1,10 @@
-import { type Outcome } from './a11y/shared.ts'
 import assert from 'node:assert'
 
+export type Gate<P> = (policy: P) => Outcome | Promise<Outcome>
+export type Outcome = { notes: string[]; problems: string[] }
+
 // The one runner of each pipeline. `pnpm <pipeline>` and `pnpm <pipeline>:<gate>` call it.
-type Gates<P> = Record<string, (policy: P) => Outcome | Promise<Outcome>>
+type Gates<P> = Record<string, Gate<P>>
 
 const GATES_MAX = 10
 

@@ -1,7 +1,9 @@
-import { exists, type Outcome, readText } from '../a11y/shared.ts'
 import { deviationProblems, readDeviations } from '../deviations.ts'
+import { type Outcome } from '../gates.ts'
+import { baseRef, onBase } from '../git.ts'
+import { exists, readText, today } from '../io.ts'
+import { POLICY_PATHS } from '../policies.ts'
 import { parseRules, unparsedProblems } from '../rules.ts'
-import { baseRef, onBase, today } from '../security/shared.ts'
 import {
   codeRemovalProblems,
   codesOf,
@@ -10,7 +12,7 @@ import {
   messageProblems,
   safeDirectionProblems,
 } from './policyChecks.ts'
-import { type Policy, POLICY_PATH } from './shared.ts'
+import { type Policy } from './shared.ts'
 import assert from 'node:assert'
 import { parse as parseYaml } from 'yaml'
 
@@ -99,7 +101,7 @@ const codeProblems = (policy: Policy): string[] => {
 const directionProblems = (policy: Policy): string[] => {
   assert(policy.version >= 1)
 
-  const main = onMain(POLICY_PATH)
+  const main = onMain(POLICY_PATHS.resilience)
 
   if (main === undefined) {
     return []
