@@ -14,6 +14,7 @@ export type Policy = {
     independence_is_mandatory: boolean
     methods: string[]
   }
+  axe: { rules_disabled: string[]; tags: string[] }
   conformance: Conformance
   contrast: {
     large_text_min: number
@@ -24,10 +25,18 @@ export type Policy = {
     attestation_days: Record<string, number>
     axes: Record<string, Record<string, string>>
     default: string
+    deviation_forbidden: string[]
     file: string
   }
   deviation: { file: string; max_days: number }
   eslint_jsx_a11y: string[]
+  focus: {
+    contrast_min: number
+    obscured_percent_max: number
+    outline_min_css_px: number
+    perimeter_min_css_px: number
+  }
+  fuzz: { invariants: string[]; keys: string[]; steps_per_route: number }
   gates: string[]
   golden: {
     announce_directory: string
@@ -35,15 +44,34 @@ export type Policy = {
     focus_directory: string
     update_flag_allowed: boolean
   }
+  incident: { never_events: string[] }
   layer: { names: string[] }
+  layout: { cumulative_layout_shift_max: number }
+  line_length: { max_characters: number; max_characters_cjk: number }
+  markup: { rules_required: string[] }
+  motion: {
+    flashes_per_second_max: number
+    reduced_motion_duration_ms_max: number
+  }
   patterns: {
     dual_model: string[]
     elements_reserved: string[]
     file: string
     primitives_directory: string
   }
-  target: { min_css_px: number }
-  tokens: { file: string }
+  target: { min_css_px: number; spacing_css_px: number }
+  text_spacing: {
+    letter_min: number
+    line_height_min: number
+    paragraph_min: number
+    word_min: number
+  }
+  timing: {
+    doherty_ms: number
+    limit_extension_count: number
+    limit_extension_factor: number
+  }
+  tokens: { file: string; literals_allowed_in: string[] }
 }
 
 const BULLET = '- **'

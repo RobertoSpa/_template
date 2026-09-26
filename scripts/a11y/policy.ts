@@ -1,8 +1,15 @@
-import { deviationProblems, readDeviations } from '../deviations.ts'
+import {
+  type Deviation,
+  deviationProblems,
+  readDeviations,
+} from '../deviations.ts'
+import { safeDirectionProblems } from '../directions.ts'
 import { type Outcome } from '../gates.ts'
+import { baseRef, onBase } from '../git.ts'
 import { exists, readText, today } from '../io.ts'
 import { POLICY_PATHS } from '../policies.ts'
 import { parseRules, type Rule, RULE_FILES } from '../rules.ts'
+import { limitsOf, removedLevelProblems } from './directionChecks.ts'
 import {
   ambiguousWordProblems,
   type Policy,
@@ -10,6 +17,7 @@ import {
   traceabilityProblems,
 } from './policyChecks.ts'
 import assert from 'node:assert'
+import { parse as parseYaml } from 'yaml'
 
 const RULES_PATH = 'docs/agents/accessibility.md'
 const ESLINT_PATH = 'eslint-rules/accessibilityConfig.js'
@@ -80,6 +88,33 @@ const eslintProblems = (policy: Policy): string[] => {
   return problems
 }
 
+const directionProblems = (
+  policy: Policy,
+  deviations: Deviation[],
+): string[] => {
+  assert(policy.gates.length > 0)
+  assert(Array.isArray(deviations))
+
+  const ref = baseRef()
+  const main = ref === undefined ? undefined : onBase(ref, POLICY_PATHS.a11y)
+
+  if (main === undefined) {
+    return []
+  }
+
+  const base = parseYaml(main) as Policy
+
+  return [
+    ...safeDirectionProblems(
+      limitsOf(policy),
+      limitsOf(base),
+      'ASOT-05',
+      deviations,
+    ),
+    ...removedLevelProblems(policy, base, deviations),
+  ]
+}
+
 const rulesProblems = (
   policy: Policy,
   rules: Rule[],
@@ -100,6 +135,7 @@ const rulesProblems = (
       ),
     ),
     ...traceabilityProblems(rules, policy.conformance),
+    ...directionProblems(policy, deviations),
     ...deviationProblems(deviations, {
       ids: { expiry: 'ADEV-03', fields: 'ADEV-01', mandatory: 'ADEV-02' },
       maxDays: policy.deviation.max_days,

@@ -19,17 +19,27 @@ export type Policy = {
     owners_allowed: string[]
     zizmor_persona: string
   }
+  change: { revert_hours: number }
   dependency: {
     allow_builds: string[]
     licenses_allowed: string[]
+    max_unmaintained_days: number
     min_lines_replaced: number
     minimum_release_age_days: number
     records: string
+    registries_allowed: string[]
+    scorecard_min: number
     trust_policy_exclude: string[]
   }
   deviation: { file: string; max_days: number }
   gates: string[]
-  repository: { binary_allowlist: string[]; binary_extensions: string[] }
+  incident: { never_events: string[]; postmortem_days: number }
+  release: { bake_minutes: number }
+  repository: {
+    binary_allowlist: string[]
+    binary_extensions: string[]
+    checks_before_merge: string[]
+  }
   secrets: { filename_patterns: string[] }
   vulnerability: { accept_file: string; deadline_days: Record<string, number> }
 }

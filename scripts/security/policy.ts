@@ -1,7 +1,13 @@
-import { deviationProblems, readDeviations } from '../deviations.ts'
+import {
+  type Deviation,
+  deviationProblems,
+  readDeviations,
+} from '../deviations.ts'
+import { safeDirectionProblems } from '../directions.ts'
 import { type Outcome } from '../gates.ts'
-import { trackedFiles } from '../git.ts'
+import { baseRef, onBase, trackedFiles } from '../git.ts'
 import { exists, readText, readYaml, today } from '../io.ts'
+import { POLICY_PATHS } from '../policies.ts'
 import {
   citationProblems,
   collisionProblems,
@@ -11,6 +17,7 @@ import {
   type RuleSource,
   unparsedProblems,
 } from '../rules.ts'
+import { limitsOf, removedLevelProblems } from './directionChecks.ts'
 import {
   type AcceptedVulnerability,
   acceptedVulnerabilityProblems,
@@ -23,6 +30,7 @@ import {
 } from './policyChecks.ts'
 import assert from 'node:assert'
 import { parse as parseToml } from 'smol-toml'
+import { parse as parseYaml } from 'yaml'
 
 const RULES_PATH = 'docs/agents/security.md'
 // The file that tests the citation check holds citations of rules that do not
@@ -118,6 +126,34 @@ const citedSources = (tracked: string[]): RuleSource[] => {
   return sources
 }
 
+const directionProblems = (
+  policy: Policy,
+  deviations: Deviation[],
+): string[] => {
+  assert(policy.gates.length > 0)
+  assert(Array.isArray(deviations))
+
+  const ref = baseRef()
+  const main =
+    ref === undefined ? undefined : onBase(ref, POLICY_PATHS.security)
+
+  if (main === undefined) {
+    return []
+  }
+
+  const base = parseYaml(main) as Policy
+
+  return [
+    ...safeDirectionProblems(
+      limitsOf(policy),
+      limitsOf(base),
+      'SOT-05',
+      deviations,
+    ),
+    ...removedLevelProblems(policy, base, deviations),
+  ]
+}
+
 export const checkPolicy = (policy: Policy): Outcome => {
   assert(policy.deviation.file.length > 0)
   assert(policy.vulnerability.accept_file.length > 0)
@@ -137,6 +173,7 @@ export const checkPolicy = (policy: Policy): Outcome => {
     ...unparsedProblems(rulesText, rules, 'DOC-01'),
     ...citationProblems(citedSources(tracked), known, 'DOC-02'),
     ...collisionProblems(ruleSources, 'DOC-03'),
+    ...directionProblems(policy, deviations),
     ...workspaceProblems(policy, readYaml<Workspace>(WORKSPACE_PATH)),
     ...dependabotProblems(policy, readYaml<Dependabot>(DEPENDABOT_PATH)),
     ...deviationProblems(deviations, {
