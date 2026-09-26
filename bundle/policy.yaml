@@ -31,6 +31,7 @@ measure:
     - .map
 
 # Each file of the output matches one group. Rules BYTE-02, BUD-05, BUD-06.
+# rule names the rule of the limits of a group, BUD-05 or BUD-06. Rule BSOT-01.
 # A text group has compress: true. Its wire bytes are the Brotli size.
 files:
   # The V8 team divides a script of more than 50 to 100 kB. One chunk that holds
@@ -38,27 +39,32 @@ files:
   # packages do not divide. These are the smallest round limits that hold them.
   script:
     extensions: [.js]
+    rule: BUD-05
     compress: true
     max_wire: 65536
     max_raw: 262144
   style:
     extensions: [.css]
+    rule: BUD-06
     compress: true
     max_wire: 20480
     max_raw: 102400
   html:
     extensions: [.html]
+    rule: BUD-06
     compress: true
     # RFC 6928: the first round trip carries 10 packets, about 14 600 bytes.
     max_wire: 14336
     max_raw: 65536
   vector:
     extensions: [.svg]
+    rule: BUD-06
     compress: true
     max_wire: 102400
     max_raw: 409600
   image:
     extensions: [.avif, .webp]
+    rule: BUD-06
     compress: false
     max_wire: 102400
     max_raw: 102400
@@ -66,11 +72,13 @@ files:
     allowed_other: []
   font:
     extensions: [.woff2]
+    rule: BUD-06
     compress: false
     max_wire: 30720
     max_raw: 30720
   data:
     extensions: [.json]
+    rule: BUD-06
     compress: true
     max_wire: 10240
     max_raw: 10240
