@@ -1,12 +1,12 @@
 {
   "files": {
     "assets/index.js": {
-      "raw": 221755,
-      "wire": 59107
+      "raw": 222076,
+      "wire": 59297
     },
     "index.html": {
       "raw": 568,
-      "wire": 261
+      "wire": 238
     }
   },
   "packages": {
@@ -17,13 +17,13 @@
   "routes": {
     "/": {
       "css": 0,
-      "js": 59107,
-      "loaded": 59368,
-      "total": 59368
+      "js": 59297,
+      "loaded": 59535,
+      "total": 59535
     }
   },
   "total": {
-    "raw": 222323,
-    "wire": 59368
+    "raw": 222644,
+    "wire": 59535
   }
 }

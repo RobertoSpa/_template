@@ -76,3 +76,50 @@ export const bannedProperties = [
     property: 'random',
   },
 ]
+
+// A rule of its own, so no list of no-restricted-syntax can drop it.
+const ENVIRONMENT = 'env'
+
+// import.meta.url and import.meta.glob stay. An alias or a destructure hides the read, so it is one too.
+const readsEnvironment = (parent) => {
+  if (parent.type !== 'MemberExpression') {
+    return true
+  }
+
+  if (parent.computed) {
+    return (
+      parent.property.type !== 'Literal' ||
+      parent.property.value === ENVIRONMENT
+    )
+  }
+
+  return parent.property.name === ENVIRONMENT
+}
+
+const noImportMetaEnvironment = {
+  create: (context) => ({
+    'MetaProperty[meta.name="import"][property.name="meta"]': (node) => {
+      if (readsEnvironment(node.parent)) {
+        context.report({ messageId: 'read', node })
+      }
+    },
+  }),
+  meta: {
+    messages: {
+      read: `Vite gives each variable as an unchecked string. Read import.meta.env one time in src/shared/parse/ and use the typed value. Rule CODE-01. ${SECURITY}`,
+    },
+    schema: [],
+    type: 'problem',
+  },
+}
+
+export const environmentBlocks = [
+  {
+    files: ['src/**/*.{js,jsx,ts,tsx}'],
+    ignores: ['src/shared/parse/**'],
+    plugins: {
+      parse: { rules: { 'no-import-meta-env': noImportMetaEnvironment } },
+    },
+    rules: { 'parse/no-import-meta-env': 'error' },
+  },
+]

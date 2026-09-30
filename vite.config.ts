@@ -1,11 +1,29 @@
 import { bundleBuild, bundleModules } from './scripts/bundle/viteBuild.ts'
+import { secretNameOf } from './src/shared/parse/environment.ts'
 import react from '@vitejs/plugin-react'
 import { playwright } from '@vitest/browser-playwright'
+import { loadEnv, type Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
+
+// Vite puts each VITE_ variable into the bundle, so a secret name stops the build.
+const refuseShippedSecret = (): Plugin => ({
+  config: (_config, { mode }) => {
+    const secretName = secretNameOf(
+      Object.keys(loadEnv(mode, process.cwd(), 'VITE_')),
+    )
+
+    if (secretName !== undefined) {
+      throw new Error(
+        `the variable ${secretName} is a secret, and Vite ships each VITE_ variable to the browser`,
+      )
+    }
+  },
+  name: 'refuse-shipped-secret',
+})
 
 export default defineConfig({
   build: bundleBuild(),
-  plugins: [react(), bundleModules()],
+  plugins: [react(), bundleModules(), refuseShippedSecret()],
   test: {
     expect: { requireAssertions: true },
     passWithNoTests: true,
