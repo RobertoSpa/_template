@@ -27,7 +27,13 @@ SOURCE = re.compile(r"(?:^|/)src/.*\.tsx?$")
 TEST = re.compile(r"\.(?:test|spec)\.tsx?$|\.integration\.ts$")
 WRITE_TOOLS = ("Write", "Edit", "NotebookEdit")
 
-FAILED_RUN = re.compile(r"Tests\s+\d+ failed|\d+ failed \(\d+\)|FAIL\s+src/")
+FAILED_RUN = re.compile(
+    r"Tests\s+\d+ failed|\d+ failed \(\d+\)|FAIL\s+src/"
+    r"|\d+ failed(?:\\n|\n) +\S+\.e2e\.[jt]s:"
+    r"|error TS\d+:"
+    r"|✖ \d+ problems? \([1-9]\d* errors?"
+    r"|(?:\\n|\n)no-go +[a-z]+"
+)
 TOOL_USE = "tool_use"
 TOOL_USE_MARK = '"tool_use"'
 

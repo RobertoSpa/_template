@@ -29,3 +29,5 @@ graphify-out/
 
 .stryker-tmp/
 reports/
+
+__pycache__/

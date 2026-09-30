@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Tests of threeLawsGate.FAILED_RUN. Run: python3 .claude/hooks/threeLawsGate_test.py
+
+Each line below is copied from a transcript. A transcript line is one JSON
+object, so a newline inside a tool result is the two characters backslash n.
+"""
+
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+from threeLawsGate import FAILED_RUN  # noqa: E402
+
+RED = [
+    ("Vitest summary", "Tests  1 failed | 4 passed (5)"),
+    ("Vitest per-file", "FAIL  src/app/main.test.tsx > shows the name"),
+    ("Playwright summary", "  1 failed\\n    e2e/siteName.e2e.ts:3:1 › shows the name"),
+    ("Playwright summary, real newline", "  1 failed\n    e2e/siteName.e2e.ts:3:1"),
+    ("tsc error", "src/app/main.tsx(7,26): error TS2877: x"),
+    ("ESLint summary", "\\n✖ 1 problem (1 error, 0 warnings)\\n"),
+    ("ESLint summary, plural", "\\n✖ 2 problems (2 errors, 0 warnings)\\n"),
+    ("no-go line of a pipeline", "$ node scripts/bundle.ts policy\\nno-go policy\\n       note:"),
+]
+
+GREEN = [
+    ("Vitest all pass", "Tests  5 passed (5)"),
+    ("Playwright all pass", "  3 passed (2.1s)"),
+    ("tsc clean", "$ tsc --noEmit\\n"),
+    ("ESLint warnings only", "\\n✖ 2 problems (0 errors, 2 warnings)\\n"),
+    ("go line of a pipeline", "$ node scripts/bundle.ts policy\\ngo     policy\\n"),
+    ("prose about the no-go line", "and each no-go line names its rule."),
+    ("timestamp before failed", "2026-09-07 23:37:14 failed: pnpm check"),
+]
+
+
+class FailedRunTest(unittest.TestCase):
+    def test_red_output_matches(self) -> None:
+        assert len(RED) == 8
+
+        for name, line in RED:
+            with self.subTest(name):
+                self.assertIsNotNone(FAILED_RUN.search(line), line)
+
+    def test_green_output_does_not_match(self) -> None:
+        assert len(GREEN) == 7
+
+        for name, line in GREEN:
+            with self.subTest(name):
+                self.assertIsNone(FAILED_RUN.search(line), line)
+
+
+if __name__ == "__main__":
+    unittest.main()
