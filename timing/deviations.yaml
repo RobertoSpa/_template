@@ -1,0 +1,6 @@
+# One record per deviation from a required rule. Rule TDEV-01 in docs/agents/timing.md.
+#
+# A record has the seven fields of Rule DEV-01 in docs/agents/security.md. The
+# field place names one route, such as /settings. A mandatory rule takes no
+# record.
+[]

@@ -1,0 +1,12 @@
+# One record per route of bundle/policy.yaml. Rule LAB-02 in docs/agents/timing.md.
+#
+# A record has two fields.
+#   path: the route, as the router names it.
+#   control: the visible text of the control that the suite presses for the
+#     INP. This field is optional. A record with no control gets the Tab key
+#     and a click on the body. Rule LAB-03.
+#
+# Example of a record:
+#   - path: /checkout
+#     control: Pay now
+- path: /

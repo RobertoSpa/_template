@@ -23,8 +23,9 @@ The folder `src/` obeys Feature-Sliced Design (FSD). The command `pnpm lint:fsd`
 | `pnpm test:integration` | Does the narrow tests against the real services. |
 | `pnpm test:mutation` | Does the Stryker mutation run. |
 | `pnpm gate:flaky` | Runs the changed tests 10 times, in a random sequence. |
-| `pnpm gates` | Runs the accessibility, security, resilience, and bundle pipelines. Run it before each merge. |
+| `pnpm gates` | Runs the accessibility, security, resilience, bundle, and timing pipelines. Run it before each merge. |
 | `pnpm bundle` | Does the bundle pipeline. |
+| `pnpm timing` | Does the timing pipeline. The gate `lab` builds and starts a browser. |
 | `pnpm bundle:write` | Writes `bundle/sizes.json` and each smaller budget. |
 | `pnpm explain <RULE-ID>` | Prints the rule that has this identifier. |
 | `pnpm shot` | Screenshots the routes into `reports/shots/`. |
@@ -109,6 +110,10 @@ The rules are in `docs/agents/resilience.md`. The numbers are in `resilience/pol
 ### Bundle pipeline
 
 The rules are in `docs/agents/bundle.md`. The numbers are in `bundle/policy.yaml`. The rules put a byte limit on each route, each file, and each branch. The branch that adds a page also adds its record in `routes`. Only `pnpm bundle:write` writes `bundle/sizes.json` or makes a budget smaller. If a rule of that file and the skills `vercel-react-best-practices` or `impeccable` disagree about bundle size, the rule wins.
+
+### Timing pipeline
+
+The rules are in `docs/agents/timing.md`. The numbers are in `timing/policy.yaml`. The rules put a limit on the LCP and the INP of each route, from the median of 5 lab loads. Each route of `bundle/policy.yaml` has a record in `timing/routes.yaml`. A record names the visible text of the control to press in `control`. A record with no control gets the Tab key and a click.
 
 <important if="a step in the setup list of README.md has no check">
 

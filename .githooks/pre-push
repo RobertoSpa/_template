@@ -50,6 +50,9 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   if grep -qx resilience/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
     fail 'RSOT-03: a change to resilience/policy.yaml is its own pull request. Move the other files to a second branch.'
   fi
+  if grep -qx timing/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
+    fail 'TSOT-04: a change to timing/policy.yaml is its own pull request. Move the other files to a second branch.'
+  fi
 done
 
 if ! mise exec -- pnpm security; then
@@ -67,6 +70,11 @@ fi
 # The check of Rule BSOT-03 is in pnpm bundle, because a smaller budget goes with code.
 if ! pnpm bundle; then
   fail 'BSOT-02: a bundle gate is no-go. Read the lines above.'
+fi
+
+# Only the gate policy runs here. The gate lab starts a browser and runs for minutes.
+if ! pnpm timing policy; then
+  fail 'TSOT-02: a timing gate is no-go. Read the lines above.'
 fi
 
 log "OK $(git rev-parse --abbrev-ref HEAD)"
