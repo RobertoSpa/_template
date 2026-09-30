@@ -30,6 +30,7 @@ export const RULE_FILES = [
   'docs/agents/bundle.md',
   'docs/agents/resilience.md',
   'docs/agents/security.md',
+  'docs/agents/timing.md',
 ]
 
 export const isIdentifier = (value: string): boolean => {

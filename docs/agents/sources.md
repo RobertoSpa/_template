@@ -97,3 +97,13 @@ Read this file before you change a rule. Read it also when you must know if the 
 - [Alex Russell, the performance inequality gap of 2026](https://infrequently.org/2025/11/performance-inequality-gap-2026/). The byte budgets for a load in 3 seconds on the P75 phone. Rule BUD-01.
 - [V8, the cost of JavaScript in 2019](https://v8.dev/blog/cost-of-javascript-2019). Divide a script of more than 50 to 100 kB, and do not inline a script of more than 1 kB. Rules BUD-05 and ASSET-01.
 - [RFC 6928](https://www.rfc-editor.org/rfc/rfc6928.html). The first answer of a TCP connection has 10 packets or fewer. The limit of the HTML file comes from that number. Rule BUD-06.
+
+## The timing rules
+
+- [web.dev, Web Vitals](https://web.dev/articles/vitals). The definitions of LCP and INP. 2500 ms or less is a good LCP, and 200 ms or less is a good INP. Rules LCP-01 and INP-01.
+- [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci). A lab timing gate in CI, with a limit per metric in a policy file. Rules TSOT-01 and LAB-01.
+- [Lighthouse user flows](https://github.com/GoogleChrome/lighthouse/blob/main/docs/user-flows.md). The author of the page writes the interaction that the lab measures. Rule LAB-03.
+- [The web-vitals library, INP](https://github.com/GoogleChrome/web-vitals#inp). The library reports an interaction of the duration threshold or more, and an INP of 0 when no interaction is that slow. Rule LAB-03.
+- [MDN, `PerformanceObserver.observe()`](https://developer.mozilla.org/docs/Web/API/PerformanceObserver/observe). The smallest `durationThreshold` that Chrome accepts is 16 ms. Rule LAB-03.
+- [Holzmann, The Power of Ten rules, NASA JPL](https://spinroot.com/gerard/pdf/P10exp.pdf). Rule 2 puts a fixed limit on each loop, and a limit that no tool can prove counts as violated. Rule LAB-01.
+- [NASA GSFC-STD-1000 Rev H](https://standards.nasa.gov/sites/default/files/standards/GSFC/H/0/GSFC-STD-1000RevH_Approved.pdf). A waiver holds for the named elements only. Rule TDEV-01.

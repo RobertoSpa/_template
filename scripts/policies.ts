@@ -6,6 +6,7 @@ export const POLICY_PATHS = {
   bundle: 'bundle/policy.yaml',
   resilience: 'resilience/policy.yaml',
   security: 'security/policy.yaml',
+  timing: 'timing/policy.yaml',
 } as const
 
 export const readPolicy = <P extends { gates: string[] }>(path: string): P => {

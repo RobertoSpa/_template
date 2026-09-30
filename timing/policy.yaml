@@ -1,0 +1,32 @@
+# Source of truth of the timing pipeline. The rules are in docs/agents/timing.md.
+# Each number is an integer of milliseconds, or a count. Rule TSOT-01.
+version: 1
+
+gates:
+  - policy
+  - lab
+
+deviation:
+  file: timing/deviations.yaml
+  max_days: 30
+
+# The lab run. Rules LAB-01 to LAB-03.
+lab:
+  # The suite loads each route in the Chromium of the end-to-end suite.
+  suite: e2e/timing.e2e.ts
+  # The suite writes each sample here. The gate lab reads the file.
+  report: reports/timing.json
+  # The gate takes the median of this many loads. An odd count has one middle.
+  runs: 5
+  # Chrome reports an interaction of this duration or more. 16 is the smallest
+  # value that Chrome accepts. An interaction below it gives an INP of 0 ms.
+  interaction_threshold_ms: 16
+
+# The good thresholds of web.dev. Rules LCP-01 and INP-01.
+limits:
+  lcp_ms: 2500
+  inp_ms: 200
+
+# One record per route of bundle/policy.yaml, in this file. Rule LAB-02.
+routes:
+  file: timing/routes.yaml

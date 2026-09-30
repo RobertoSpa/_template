@@ -4,7 +4,7 @@ import assert from 'node:assert'
 
 type Policy = { gates: string[] }
 
-const PIPELINES = ['a11y', 'security', 'resilience', 'bundle']
+const PIPELINES = ['a11y', 'security', 'resilience', 'bundle', 'timing']
 
 const pipeline =
   (name: string): Gate<Policy> =>
