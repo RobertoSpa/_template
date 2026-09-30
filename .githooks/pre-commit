@@ -6,6 +6,4 @@ if ! command -v mise >/dev/null; then
   exit 1
 fi
 mise exec -- gitleaks git --staged --no-banner --redact .
-pnpm lint
-pnpm lint:fsd
-pnpm check
+pnpm verify
