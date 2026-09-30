@@ -8,6 +8,7 @@ import {
   bannedEverywhere,
   bannedInTests,
   bannedProperties,
+  environmentBlocks,
   htmlSinks,
   parseSinks,
   typeHoles,
@@ -249,6 +250,7 @@ export default ts.config(
   },
   ...resilienceBlocks,
   ...bundleBlocks,
+  ...environmentBlocks,
   {
     files: ['**/*.{test,spec}.{ts,tsx}'],
     plugins: { vitest },

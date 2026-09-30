@@ -39,13 +39,10 @@ export const listen = (
   })
 }
 
-export const create = (): Reporter =>
-  build(
-    (report) => {
-      console.error(JSON.stringify(report))
-    },
-    import.meta.env.MODE,
-  )
+export const create = (release: string): Reporter =>
+  build((report) => {
+    console.error(JSON.stringify(report))
+  }, release)
 
 // Stryker disable next-line all
 export const createNull = (release = 'test') => {
