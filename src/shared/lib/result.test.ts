@@ -1,15 +1,32 @@
-import { fail, ok } from './result.ts'
-import { describe, expect, it } from 'vitest'
+import { type AppError } from './appError.ts'
+import { fail, ok, type Result } from './result.ts'
+import { describe, expect, expectTypeOf, it } from 'vitest'
 
 describe('Result', () => {
   it('ok holds the value', () => {
-    expect(ok(3)).toStrictEqual({ ok: true, value: 3 })
+    const result = ok(3)
+
+    expectTypeOf(result).toEqualTypeOf<Result<number>>()
+    expectTypeOf(result)
+      .extract<{ ok: true }>()
+      .toHaveProperty('value')
+      .toEqualTypeOf<number>()
+    expect(result).toStrictEqual({ ok: true, value: 3 })
   })
 
   it('fail holds the error', () => {
-    expect(
-      fail({ code: 'timeout', context: 'load rates', detail: '' }),
-    ).toStrictEqual({
+    const result = fail<number>({
+      code: 'timeout',
+      context: 'load rates',
+      detail: '',
+    })
+
+    expectTypeOf(result).toEqualTypeOf<Result<number>>()
+    expectTypeOf(result)
+      .extract<{ ok: false }>()
+      .toHaveProperty('error')
+      .toEqualTypeOf<AppError>()
+    expect(result).toStrictEqual({
       error: { code: 'timeout', context: 'load rates', detail: '' },
       ok: false,
     })
