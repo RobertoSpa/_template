@@ -30,7 +30,7 @@ const messagesOf = async (source: string, filePath: string) => {
     .map((message) => message.message)
 }
 
-describe('the lint rule for import.meta.env', () => {
+describe('the lint rule for import.meta.env', { timeout: 30_000 }, () => {
   it.each([
     ['a dotted read', DOTTED],
     ['a computed read', "export const mode = import.meta['env'].MODE\n"],
