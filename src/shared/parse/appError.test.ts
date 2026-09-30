@@ -1,5 +1,6 @@
+import { type AppError } from '../lib/appError.ts'
 import { toAppError, toFetchError } from './appError.ts'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vitest'
 
 describe('toAppError', () => {
   it.each([
@@ -18,7 +19,10 @@ describe('toAppError', () => {
   })
 
   it('keeps the message of an Error as the detail', () => {
-    expect(toAppError(new Error('boom'), 'load')).toStrictEqual({
+    const error = toAppError(new Error('boom'), 'load')
+
+    expectTypeOf(error).toEqualTypeOf<AppError>()
+    expect(error).toStrictEqual({
       code: 'unexpected',
       context: 'load',
       detail: 'boom',
@@ -32,9 +36,10 @@ describe('toAppError', () => {
 
 describe('toFetchError', () => {
   it('reads a TypeError from fetch as a network error', () => {
-    expect(
-      toFetchError(new TypeError('Failed to fetch'), 'GET /a'),
-    ).toStrictEqual({
+    const error = toFetchError(new TypeError('Failed to fetch'), 'GET /a')
+
+    expectTypeOf(error).toEqualTypeOf<AppError>()
+    expect(error).toStrictEqual({
       code: 'network',
       context: 'GET /a',
       detail: 'Failed to fetch',
