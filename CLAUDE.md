@@ -18,6 +18,7 @@ The folder `src/` obeys Feature-Sliced Design (FSD). The command `pnpm lint:fsd`
 | `pnpm lint` | Does the Prettier test and the ESLint test. |
 | `pnpm lint:fsd` | Does the FSD test on `src/`. |
 | `pnpm check` | Does the TypeScript test. |
+| `pnpm verify` | Runs `pnpm lint`, `pnpm lint:fsd`, `pnpm check`, and the unit tests. Run it after each change. |
 | `pnpm test` | Does the unit tests and the end-to-end tests. |
 | `pnpm test:integration` | Does the narrow tests against the real services. |
 | `pnpm test:mutation` | Does the Stryker mutation run. |

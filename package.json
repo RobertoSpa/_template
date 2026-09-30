@@ -45,7 +45,8 @@
     "test:e2e": "playwright test --pass-with-no-tests",
     "test:integration": "vitest run --project integration",
     "test:mutation": "stryker run",
-    "test:unit": "vitest --project client --project server"
+    "test:unit": "vitest --project client --project server",
+    "verify": "pnpm lint && pnpm lint:fsd && pnpm check && pnpm test:unit -- --run"
   },
   "dependencies": {
     "react": "19.3.0",

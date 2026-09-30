@@ -45,11 +45,8 @@ jobs:
         with:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm lint:fsd
-      - run: pnpm check
+      - run: pnpm verify
       - run: pnpm gate:flaky "origin/$BASE"
         env:
           BASE: ${{ github.base_ref || github.ref_name }}
-      - run: pnpm test:unit -- --run
       - run: pnpm exec playwright test --pass-with-no-tests
