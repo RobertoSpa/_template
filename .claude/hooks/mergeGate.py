@@ -7,6 +7,7 @@ has no ruleset, so this hook is the required status check.
 
 import json
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -14,8 +15,38 @@ from pathlib import Path
 LOG = Path.home() / ".local" / "state" / "script-logs" / "merge-gate.log"
 LOG_LINES_MAX = 2000
 CHECKS_TIMEOUT_SECONDS = 60
-MERGE = re.compile(r"\bgh\s+pr\s+merge\b(?:\s+(?P<target>[^\s-]\S*))?")
+MERGE = re.compile(r"\bgh\s+pr\s+merge\b")
+MERGE_VALUE_FLAGS = frozenset(
+    {"-A", "--author-email", "-b", "--body", "-F", "--body-file", "--match-head-commit", "-t", "--subject", "-R", "--repo"}
+)
+SHELL_OPERATOR_CHARACTERS = frozenset("();<>|&")
+FILE_DESCRIPTOR_REDIRECT = re.compile(r"(?<=\s)\d+(?=[<>])")
 PASSED_BUCKETS = ("pass", "skipping")
+
+
+def merge_target(command: str) -> str | None:
+    assert isinstance(command, str)
+    match = MERGE.search(command)
+    assert match is not None
+    rest = FILE_DESCRIPTOR_REDIRECT.sub("", command[match.end() :])
+    lexer = shlex.shlex(rest, posix=True, punctuation_chars=True)
+    lexer.whitespace_split = True
+    try:
+        tokens = list(lexer)
+    except ValueError as error:
+        log(f"ERROR shlex failed, split on spaces: {error}")
+        tokens = rest.split()
+    value_expected = False
+    for token in tokens:
+        if token and set(token) <= SHELL_OPERATOR_CHARACTERS:
+            return None
+        if value_expected:
+            value_expected = False
+        elif token.startswith("-"):
+            value_expected = token in MERGE_VALUE_FLAGS
+        elif token:
+            return token
+    return None
 
 
 def log(message: str) -> None:
@@ -72,10 +103,9 @@ def main() -> int:
     assert isinstance(payload, dict)
     command = payload.get("tool_input", {}).get("command", "")
     assert isinstance(command, str)
-    match = MERGE.search(command)
-    if match is None:
+    if MERGE.search(command) is None:
         return 0
-    unfinished = unfinished_checks(match.group("target"))
+    unfinished = unfinished_checks(merge_target(command))
     if unfinished:
         deny("REPO-02: a check on the pull request head is not green. " + "; ".join(unfinished))
         return 0
