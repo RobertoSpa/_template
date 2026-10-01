@@ -9,6 +9,7 @@ The folder `src/` obeys Feature-Sliced Design (FSD). The command `pnpm lint:fsd`
 - A slice does not import from a different slice on the same layer.
 - A slice does not have an `index` file. Each caller imports from the file that holds the code. The `steiger` rule `fsd/public-api` is off for this reason.
 - If a layer is empty, delete the folder.
+- An import through the alias `@/` has no file ending. An import that starts with `./` or `../` keeps its file ending.
 
 ## Commands
 
