@@ -24,6 +24,7 @@ const refuseShippedSecret = (): Plugin => ({
 export default defineConfig({
   build: bundleBuild(),
   plugins: [react(), bundleModules(), refuseShippedSecret()],
+  resolve: { tsconfigPaths: true },
   test: {
     expect: { requireAssertions: true },
     passWithNoTests: true,
