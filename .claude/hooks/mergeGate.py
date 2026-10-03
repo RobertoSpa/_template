@@ -84,9 +84,14 @@ def unfinished_checks(target: str | None) -> list[str]:
     command = ["gh", "pr", "checks", "--json", "name,bucket"]
     if target is not None:
         command.append(target)
-    result = subprocess.run(
-        command, capture_output=True, text=True, timeout=CHECKS_TIMEOUT_SECONDS, check=False
-    )
+    try:
+        result = subprocess.run(
+            command, capture_output=True, text=True, timeout=CHECKS_TIMEOUT_SECONDS, check=False
+        )
+    except subprocess.TimeoutExpired:
+        cause = f"gh pr checks timed out after {CHECKS_TIMEOUT_SECONDS} seconds"
+        log(f"ERROR {cause}")
+        return [cause]
     if result.returncode not in (0, 8):
         return [f"gh pr checks failed: {result.stderr.strip() or result.stdout.strip()}"]
     checks = json.loads(result.stdout or "[]")

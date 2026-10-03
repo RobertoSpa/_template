@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""Tests of mergeGate.merge_target. Run: python3 .claude/hooks/mergeGate_test.py"""
+"""Tests of mergeGate. Run: python3 .claude/hooks/mergeGate_test.py"""
 
+import io
+import json
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).parent))
+import mergeGate  # noqa: E402
 from mergeGate import merge_target  # noqa: E402
 
 TARGETS = [
@@ -46,6 +50,24 @@ class MergeTargetTest(unittest.TestCase):
         for name, command in NO_TARGET:
             with self.subTest(name):
                 self.assertIsNone(merge_target(command))
+
+
+class CheckTimeoutTest(unittest.TestCase):
+    def test_timeout_denies_merge(self) -> None:
+        payload = json.dumps({"tool_input": {"command": "gh pr merge 12"}})
+        stdout = io.StringIO()
+
+        with (
+            patch.object(mergeGate, "CHECKS_TIMEOUT_SECONDS", 0.001),
+            patch.object(sys, "stdin", io.StringIO(payload)),
+            patch.object(sys, "stdout", stdout),
+        ):
+            exit_code = mergeGate.main()
+
+        output = json.loads(stdout.getvalue())["hookSpecificOutput"]
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(output["permissionDecision"], "deny")
+        self.assertIn("timed out after 0.001 seconds", output["permissionDecisionReason"])
 
 
 if __name__ == "__main__":
