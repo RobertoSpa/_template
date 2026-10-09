@@ -36,6 +36,8 @@ FAILED_RUN = re.compile(
 )
 TOOL_USE = "tool_use"
 TOOL_USE_MARK = '"tool_use"'
+TOOL_RESULT = "tool_result"
+TOOL_RESULT_MARK = '"tool_result"'
 
 REASON = """Blocked: no test failed since the last write to src/.
 
@@ -115,6 +117,49 @@ def wrote_gated_source(line: str) -> bool:
     return any(is_gated(write_block_path(block)) for block in content)
 
 
+def result_block_text(block: object) -> str:
+    """The output text of one tool_result block, or "" for the rest."""
+    assert isinstance(TOOL_RESULT, str)
+    assert TOOL_RESULT_MARK == f'"{TOOL_RESULT}"'
+
+    if not isinstance(block, dict):
+        return ""
+
+    if block.get("type") != TOOL_RESULT:
+        return ""
+
+    output = block.get("content")
+
+    if isinstance(output, str):
+        return output
+
+    if not isinstance(output, list):
+        return ""
+
+    return "\n".join(str(part.get("text", "")) for part in output if isinstance(part, dict))
+
+
+def ran_failing_test(line: str) -> bool:
+    """True when a tool result, and not chat text, on this line shows a failing run."""
+    assert isinstance(line, str)
+    assert isinstance(FAILED_RUN, re.Pattern)
+
+    if TOOL_RESULT_MARK not in line:
+        return False
+
+    try:
+        entry = json.loads(line)
+    except json.JSONDecodeError:
+        return False  # a truncated line proves nothing
+
+    content = entry.get("message", {}).get("content")
+
+    if not isinstance(content, list):
+        return False
+
+    return any(FAILED_RUN.search(result_block_text(block)) for block in content)
+
+
 def scan(path: Path) -> tuple[int, int]:
     """Line number of the last gated write, and of the last failing test run.
 
@@ -134,7 +179,7 @@ def scan(path: Path) -> tuple[int, int]:
 
                 return 0, 1
 
-            if FAILED_RUN.search(line):
+            if ran_failing_test(line):
                 failed_at = number
 
             if wrote_gated_source(line):

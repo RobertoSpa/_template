@@ -5,12 +5,14 @@ Each line below is copied from a transcript. A transcript line is one JSON
 object, so a newline inside a tool result is the two characters backslash n.
 """
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from threeLawsGate import FAILED_RUN  # noqa: E402
+from threeLawsGate import FAILED_RUN, scan  # noqa: E402
 
 RED = [
     ("Vitest summary", "Tests  1 failed | 4 passed (5)"),
@@ -48,6 +50,48 @@ class FailedRunTest(unittest.TestCase):
         for name, line in GREEN:
             with self.subTest(name):
                 self.assertIsNone(FAILED_RUN.search(line), line)
+
+
+SCANNED = [
+    ("user chat text", 0, {"type": "user", "message": {"content": "the CI log says Tests 3 failed"}}),
+    (
+        "assistant text block",
+        0,
+        {"type": "assistant", "message": {"content": [{"type": "text", "text": "FAIL  src/app/main.test.tsx"}]}},
+    ),
+    (
+        "tool result string",
+        1,
+        {"type": "user", "message": {"content": [{"type": "tool_result", "content": "Tests  1 failed | 4 passed (5)"}]}},
+    ),
+    (
+        "tool result text blocks",
+        1,
+        {
+            "type": "user",
+            "message": {
+                "content": [{"type": "tool_result", "content": [{"type": "text", "text": "  1 failed\n    e2e/a.e2e.ts:3:1"}]}]
+            },
+        },
+    ),
+    (
+        "tool result that passed",
+        0,
+        {"type": "user", "message": {"content": [{"type": "tool_result", "content": "Tests  5 passed (5)"}]}},
+    ),
+]
+
+
+class ScanTest(unittest.TestCase):
+    def test_only_a_tool_result_counts_as_a_failing_run(self) -> None:
+        assert len(SCANNED) == 5
+
+        for name, failed_at, entry in SCANNED:
+            with self.subTest(name), tempfile.TemporaryDirectory() as directory:
+                transcript = Path(directory) / "transcript.jsonl"
+                transcript.write_text(json.dumps(entry) + "\n")
+
+                self.assertEqual(scan(transcript), (0, failed_at))
 
 
 if __name__ == "__main__":
