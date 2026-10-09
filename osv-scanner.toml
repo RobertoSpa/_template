@@ -11,3 +11,8 @@ reason = "osv-scanner reads no license for this package, and its package.json sa
 id = "GHSA-vfj7-8cjw-p6xm"
 ignoreUntil = 2026-11-02
 reason = "S4: braces reaches only the lint tooling, the glob patterns come from the repository config, and no fixed release exists"
+
+[[IgnoredVulns]]
+id = "GHSA-7mx3-vvmw-hjmv"
+ignoreUntil = 2026-10-14
+reason = "S4: graphql-tools/utils reaches only the lint tooling through graphql-config, the input comes from the repository config, and the fixed graphql-config 5.1.8 passes the release age on 2026-10-14"
