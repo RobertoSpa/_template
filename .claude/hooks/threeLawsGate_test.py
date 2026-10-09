@@ -79,12 +79,14 @@ SCANNED = [
         0,
         {"type": "user", "message": {"content": [{"type": "tool_result", "content": "Tests  5 passed (5)"}]}},
     ),
+    ("line that is a list", 0, ["tool_result", "tool_use"]),
+    ("message that is null", 0, {"type": "user", "message": None, "note": ["tool_result", "tool_use"]}),
 ]
 
 
 class ScanTest(unittest.TestCase):
     def test_only_a_tool_result_counts_as_a_failing_run(self) -> None:
-        assert len(SCANNED) == 5
+        assert len(SCANNED) == 7
 
         for name, failed_at, entry in SCANNED:
             with self.subTest(name), tempfile.TemporaryDirectory() as directory:

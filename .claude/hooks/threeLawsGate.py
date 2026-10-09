@@ -104,17 +104,33 @@ def wrote_gated_source(line: str) -> bool:
     if TOOL_USE_MARK not in line:
         return False
 
+    return any(is_gated(write_block_path(block)) for block in content_blocks(line))
+
+
+def content_blocks(line: str) -> list:
+    """The message content blocks of one transcript line, or [] for any other shape."""
+    assert isinstance(line, str)
+    assert line != ""
+
     try:
         entry = json.loads(line)
     except json.JSONDecodeError:
-        return False  # a truncated line proves nothing
+        return []  # a truncated line proves nothing
 
-    content = entry.get("message", {}).get("content")
+    if not isinstance(entry, dict):
+        return []
+
+    message = entry.get("message")
+
+    if not isinstance(message, dict):
+        return []
+
+    content = message.get("content")
 
     if not isinstance(content, list):
-        return False
+        return []
 
-    return any(is_gated(write_block_path(block)) for block in content)
+    return content
 
 
 def result_block_text(block: object) -> str:
@@ -147,17 +163,7 @@ def ran_failing_test(line: str) -> bool:
     if TOOL_RESULT_MARK not in line:
         return False
 
-    try:
-        entry = json.loads(line)
-    except json.JSONDecodeError:
-        return False  # a truncated line proves nothing
-
-    content = entry.get("message", {}).get("content")
-
-    if not isinstance(content, list):
-        return False
-
-    return any(FAILED_RUN.search(result_block_text(block)) for block in content)
+    return any(FAILED_RUN.search(result_block_text(block)) for block in content_blocks(line))
 
 
 def scan(path: Path) -> tuple[int, int]:
