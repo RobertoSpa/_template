@@ -1,4 +1,5 @@
 import { bundleBuild, bundleModules } from './scripts/bundle/viteBuild.ts'
+import { exposurePreview } from './scripts/exposure/previewAdapter.ts'
 import { secretNameOf } from './src/shared/parse/environment.ts'
 import react from '@vitejs/plugin-react'
 import { playwright } from '@vitest/browser-playwright'
@@ -23,7 +24,7 @@ const refuseShippedSecret = (): Plugin => ({
 
 export default defineConfig({
   build: bundleBuild(),
-  plugins: [react(), bundleModules(), refuseShippedSecret()],
+  plugins: [react(), bundleModules(), refuseShippedSecret(), exposurePreview()],
   resolve: { tsconfigPaths: true },
   test: {
     expect: { requireAssertions: true },

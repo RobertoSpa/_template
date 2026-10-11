@@ -16,8 +16,8 @@ work that no person did on that machine.
 
 1. Install `mise` with the package manager of the machine. Run `mise trust`,
    then `mise install`, which gets the six tools of `mise.toml`. Add
-   `mise activate` to the shell configuration, so that `pnpm security` finds
-   the tools. The git hooks call `mise exec` and work without the activation.
+   `mise activate` to the shell configuration, so that `pnpm security` and
+   `pnpm exposure` find the tools. The git hooks call `mise exec` and work without the activation.
 2. Turn on commit signing with an SSH key. Run the four commands below. Then
    write one line with your email, a space, and the public key in
    `~/.ssh/allowed_signers`. The pre-push hook refuses an unsigned commit.
@@ -48,11 +48,12 @@ clone reports work that no person did in that project.
 - [ ] The first route renders: write its record in `a11y/routes.yaml` with the three axes, then write the golden files that `a11y/policy.yaml` names. Read `docs/agents/accessibility.md` first.
 - [ ] The first route has no safe mode: write its record in `resilience/routes.yaml` with its core text, its safe mode, and its dependencies. Read `docs/agents/resilience.md` first.
 - [ ] The first page ships to users: in `bundle/policy.yaml`, move its route to the stage `measured`. Then run `pnpm bundle:write`. Read `docs/agents/bundle.md` first.
-- [ ] A deploy target exists: make the host send the Brotli files at the quality of `measure.brotli_quality` in `bundle/policy.yaml`. Rule BYTE-01 measures that quality. Keep each `.map` file and the folder `dist/.vite/` out of the upload. Rule MAP-02.
+- [ ] A deploy target exists: make the host send the Brotli files at the quality of `measure.brotli_quality` in `bundle/policy.yaml`. Rule BYTE-01 measures that quality. Keep each `.map` file and the folder `dist/.vite/` out of the upload. Rule MAP-02. Then do the four exposure steps. Copy the adapter of the host from `exposure/adapters/` to the place that the host reads. Upload the files of `reports/exposure/manifest.json` and nothing else. Write `public/.well-known/security.txt` with a `Contact` line and an `Expires` line. Set `live.url` in `exposure/policy.yaml`, add `live` to `gates`, and add the host of that URL with `:443` to `allowed-endpoints` in `.github/workflows/exposure.yml`. Then send the domain to hstspreload.org. Rules OUT-07, OUT-08, PROBE-03, and HDR-04.
 - [ ] The first interactive component exists: add `axe-core`, `@axe-core/playwright` and `html-validate`. Then turn on the axe run and the markup run in `pnpm a11y:tree` and `pnpm a11y:static`.
 - [ ] The palette is complete: add `apca-w3`, then turn on the APCA note of rule COLOR-07 in `pnpm a11y:tokens`.
 - [ ] `src/shared/ui/` holds a primitive: add `@guidepup/virtual-screen-reader` and write the announce golden files. Rule EV-07 makes the result a note and not a statement about a real screen reader.
-- [ ] The folder `apps/api` exists: add `dependency-cruiser` with the Clean Architecture layers.
+- [ ] The folder `apps/api` exists: add `dependency-cruiser` with the Clean Architecture layers. Then set `server.kind` in `exposure/policy.yaml`, write the one module `server.authorize`, and give each non-public route its audience in `exposure/routes.yaml`. Read each record in the review, and read the query of each handler with a parameter. Rules ROUTE-05, ROUTE-06, and ROUTE-08.
+- [ ] The first migration exists: set `data.kind` in `exposure/policy.yaml`, and list each table that the role `anon` reads in `data.postgres.anon_readable`. Run the tests of the data layer on the real engine before each release. Read `docs/agents/exposure.md` first. Rules DATA-01 and DATA-08.
 - [ ] The first module in `src/` has logic: run `pnpm test:mutation`. Then increase the Stryker floor in `stryker.config.json` from 60 to the score that this project holds. The `Mutation` workflow runs on each pull request with `--incremental`, and each Monday with `--force`.
 
 Note: `pnpm test:mutation` stops with an error while `src/` has no module to mutate. The CI job finds this condition and does not run Stryker.

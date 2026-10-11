@@ -53,6 +53,9 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   if grep -qx timing/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
     fail 'TSOT-04: a change to timing/policy.yaml is its own pull request. Move the other files to a second branch.'
   fi
+  if grep -qx exposure/policy.yaml <<<"$modified" && [ "$(wc -l <<<"$changed")" -gt 1 ]; then
+    fail 'ESOT-04: a change to exposure/policy.yaml is its own pull request. Move the other files to a second branch.'
+  fi
 done
 
 if ! mise exec -- pnpm security; then
@@ -75,6 +78,11 @@ fi
 # Only the gate policy runs here. The gate lab starts a browser and runs for minutes.
 if ! pnpm timing policy; then
   fail 'TSOT-02: a timing gate is no-go. Read the lines above.'
+fi
+
+# The gate output builds, and the gate probe starts a browser. CI runs them.
+if ! pnpm exposure policy data adapters; then
+  fail 'ESOT-02: an exposure gate is no-go. Read the lines above.'
 fi
 
 log "OK $(git rev-parse --abbrev-ref HEAD)"

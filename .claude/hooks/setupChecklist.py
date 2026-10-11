@@ -11,6 +11,7 @@ LOG_PATH = Path.home() / ".local/state/script-logs/setupChecklist.log"
 SOURCE_FILES_MAX = 5000
 STEP_PREFIX = "- [ ] "
 DEPLOY_FILES = ("vercel.json", ".vercel", "netlify.toml", "wrangler.toml", "fly.toml")
+MIGRATION_FILES = ("supabase/migrations", "firestore.rules")
 
 
 def log(message):
@@ -119,6 +120,30 @@ def deploy_target_exists(root):
     return len(found) > 0
 
 
+def data_kind_is_none(root):
+    """True when the kind line of the data block, and not of the server block, is none."""
+    assert isinstance(root, Path)
+    policy = root / "exposure/policy.yaml"
+    if not policy.is_file():
+        return False
+    lines = policy.read_text(encoding="utf-8").splitlines()
+    assert len(lines) > 0
+    block = ""
+    for line in lines:
+        if line and not line.startswith((" ", "#")):
+            block = line.split(":", 1)[0]
+        if block == "data" and line.startswith("  kind:"):
+            return line.split(":", 1)[1].strip() == "none"
+    return False
+
+
+def migration_exists(root):
+    assert isinstance(root, Path)
+    found = [name for name in MIGRATION_FILES if (root / name).exists()]
+    assert len(found) <= len(MIGRATION_FILES)
+    return len(found) > 0
+
+
 def conditions(root):
     assert isinstance(root, Path)
     sources = source_files(root)
@@ -144,6 +169,7 @@ def conditions(root):
         and not any(stage in ("measured", "released") for stage in bundle_route_stages(root))
         and len(page_files(root)) > 0,
         "deploy target exists": deploy_target_exists(root),
+        "first migration exists": migration_exists(root) and data_kind_is_none(root),
         "first interactive component exists": package_lacks(root, "axe-core")
         and len(ui_primitives(root)) > 0,
         "palette is complete": package_lacks(root, "apca-w3")
@@ -153,7 +179,7 @@ def conditions(root):
         )
         and len(ui_primitives(root)) > 0,
     }
-    assert len(live) == 13
+    assert len(live) == 14
     return live
 
 

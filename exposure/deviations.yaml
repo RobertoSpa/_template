@@ -1,0 +1,7 @@
+# DANGER: a record here turns one refusal off for one place until its expiry.
+# One record per deviation from a required rule. Rule EDEV-01 in docs/agents/exposure.md.
+#
+# A record has the seven fields of Rule DEV-01 in docs/agents/security.md. The
+# field place names one route, one header name, one path, or one key of the
+# policy file. A mandatory rule takes no record.
+[]

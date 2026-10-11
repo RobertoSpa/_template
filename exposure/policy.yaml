@@ -1,0 +1,234 @@
+# DANGER: a wrong value here is what an anonymous visitor gets. A loose header
+# lets a page be framed or scripted. A loose extension list serves a backup or
+# a key. A loose route record opens a page to the public internet.
+# Source of truth of the exposure pipeline. The rules are in docs/agents/exposure.md.
+# Each number is a positive integer. Rule ESOT-01.
+version: 1
+
+gates:
+  - policy
+  - data
+  - adapters
+  - output
+  - probe
+
+deviation:
+  file: exposure/deviations.yaml
+  # Days that one record lives. Too high: a hole stays open with no new look.
+  max_days: 30
+
+# The header set of every response. Rules HDR-01 to HDR-11.
+# scripts/exposure/headers.ts turns this block into the one header list that
+# the preview server, each adapter, and the probe read. Names are lowercase.
+headers:
+  # Rule HDR-02. One list per directive. The serializer sorts the directives.
+  # A source of * or https: lets any site script the page. 'unsafe-inline'
+  # lets an injected tag run.
+  csp:
+    base-uri: ["'none'"]
+    connect-src: ["'self'"]
+    default-src: ["'self'"]
+    font-src: ["'self'"]
+    form-action: ["'self'"]
+    frame-ancestors: ["'none'"]
+    img-src: ["'self'", 'data:']
+    object-src: ["'none'"]
+    # Rule HDR-02. A script that writes html goes through a Trusted Types policy.
+    require-trusted-types-for: ["'script'"]
+    script-src: ["'self'"]
+    # The hash is the <style> of index.html, which hides the fallback text for
+    # five seconds. pnpm exposure output prints the new hash when the style
+    # changes. A missing hash blocks the style, and the fallback text paints.
+    style-src:
+      ["'self'", "'sha256-yqPwOgT8pnnepB+5fnwt6K9Livx5ogF+g236RHGkulk='"]
+    upgrade-insecure-requests: []
+  # Rules HDR-03 and HDR-05. One value per header. The probe compares bytes.
+  fixed:
+    cross-origin-embedder-policy: require-corp
+    cross-origin-opener-policy: same-origin
+    cross-origin-resource-policy: same-origin
+    referrer-policy: no-referrer
+    # 63072000 seconds is two years, the value of the preload list.
+    strict-transport-security: max-age=63072000; includeSubDomains; preload
+    x-content-type-options: nosniff
+    x-frame-options: DENY
+  # Rule HDR-06. Each feature gets an empty allowlist, name=(). Fewer names
+  # here is the unsafe direction.
+  permissions_denied:
+    - accelerometer
+    - autoplay
+    - camera
+    - display-capture
+    - encrypted-media
+    - fullscreen
+    - geolocation
+    - gyroscope
+    - magnetometer
+    - microphone
+    - midi
+    - payment
+    - picture-in-picture
+    - publickey-credentials-get
+    - screen-wake-lock
+    - sync-xhr
+    - usb
+    - web-share
+    - xr-spatial-tracking
+  # Rules HDR-07 and HDR-08. A response never carries one of these. Fewer names
+  # here is the unsafe direction.
+  absent:
+    - access-control-allow-origin
+    - expect-ct
+    - feature-policy
+    - public-key-pins
+    - server
+    - x-powered-by
+    - x-xss-protection
+  # Rule HDR-09. The html and each unhashed file get no-cache. A hashed file
+  # gets the immutable value. 31536000 seconds is one year.
+  cache:
+    hashed: public, max-age=31536000, immutable
+    other: no-cache
+  # Rule HDR-11.
+  html_content_type: text/html; charset=utf-8
+
+# Rules ROUTE-01 to ROUTE-07. One record per route of bundle/policy.yaml.
+routes:
+  file: exposure/routes.yaml
+  # The audiences that a record may name. public is the only one that a
+  # static build can serve. A new name here needs a server. Rule ROUTE-02.
+  audiences:
+    - public
+  # The status that an anonymous visitor gets for a route of another
+  # audience. 404 hides that the route exists. Rule ROUTE-03.
+  anonymous_status: 404
+  # The status of a method that a record does not list. Rule ROUTE-03.
+  method_status: 405
+  # The methods that a record gets when it lists none.
+  methods_default:
+    - GET
+    - HEAD
+  # Rule ROUTE-08. A record with a parameter in its path names the scope of
+  # its data. owner: the row of the caller. tenant: the rows of the tenant of
+  # the caller. public: each row.
+  scopes:
+    - owner
+    - public
+    - tenant
+
+# Rule ROUTE-05. A server that answers for a non-public route.
+server:
+  # none, or node. Only none is permitted while apps/ holds no server.
+  kind: none
+  # The one module that decides access. Each handler file imports it.
+  authorize: apps/api/src/authorize.ts
+  # The folder of the handler files.
+  handlers: apps/api/src/routes
+
+# Rules DATA-01 to DATA-08.
+data:
+  # none, postgres, or firestore. A package of the other kinds is refused.
+  kind: none
+  # The packages that tell which data layer a project added. Rule DATA-01.
+  packages:
+    postgres:
+      - '@neondatabase/serverless'
+      - '@supabase/supabase-js'
+      - '@vercel/postgres'
+      - drizzle-orm
+      - kysely
+      - pg
+      - postgres
+      - prisma
+    firestore:
+      - firebase
+      - firebase-admin
+    # A package with no rules in this pipeline. Rule DATA-01 refuses it.
+    unsupported:
+      - convex
+      - mongodb
+      - mongoose
+  # A host name in the served set that tells which data layer a project calls
+  # over plain fetch. Rule DATA-01.
+  hosts:
+    postgres:
+      - .neon.tech
+      - .supabase.co
+    firestore:
+      - firebaseio.com
+      - firestore.googleapis.com
+    # A host of a data layer with no rules in this pipeline. Rule DATA-01 refuses it.
+    unsupported:
+      - .convex.cloud
+      - mongodb.net
+  postgres:
+    migrations: supabase/migrations
+    tests: supabase/tests
+    # Each table that the anon role may read. Each name needs a test file.
+    anon_readable: []
+  firestore:
+    rules: firestore.rules
+    tests: firestore.rules.test.ts
+
+# Rules OUT-01 to OUT-09. The served set is the output minus skip.
+output:
+  dir: dist
+  # Vite writes the maps and .vite/ here. No host serves them. Rule OUT-01.
+  skip:
+    - .map
+    - .vite/
+  # Each served file has one of these extensions. A new extension here is the
+  # unsafe direction.
+  served_extensions:
+    - .avif
+    - .css
+    - .html
+    - .ico
+    - .js
+    - .json
+    - .svg
+    - .txt
+    - .webmanifest
+    - .webp
+    - .woff2
+    - .xml
+  # A path segment that starts with a dot is served only from this list.
+  dot_allowed:
+    - .well-known
+  files_max: 200
+  # Rule OUT-05. The gitleaks rules of the served set.
+  gitleaks_config: exposure/gitleaks.toml
+  file_bytes_max: 5242880
+  # Rule OUT-06. The deploy uploads the files of this list and nothing else.
+  manifest: reports/exposure/manifest.json
+  # Rule OUT-08. The days that security.txt may stay valid, and the days
+  # before its expiry at which the gate refuses it.
+  security_txt:
+    path: .well-known/security.txt
+    expires_days_max: 365
+    expires_days_min: 30
+
+# Rules PROBE-01 to PROBE-03.
+probe:
+  suite: e2e/exposure.e2e.ts
+  report: reports/exposure/probe.json
+  # Each path answers 404 with the full header set. More paths is the safe
+  # direction.
+  paths:
+    - /.env
+    - /.env.local
+    - /.git/HEAD
+    - /.git/config
+    - /.DS_Store
+    - /.vite/manifest.json
+    - /assets/
+    - /index.html.map
+    - /package.json
+    - /vite.config.ts
+  # The origin that the probe sends. No response names an origin back. Rule HDR-08.
+  foreign_origin: https://evil.example
+
+# Rule PROBE-03. The deployed URL. Empty until a deploy target exists. When it
+# holds a URL, gates holds live.
+live:
+  url: ''

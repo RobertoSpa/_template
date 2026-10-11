@@ -28,6 +28,7 @@ const LINES_MAX = 100_000
 export const RULE_FILES = [
   'docs/agents/accessibility.md',
   'docs/agents/bundle.md',
+  'docs/agents/exposure.md',
   'docs/agents/resilience.md',
   'docs/agents/security.md',
   'docs/agents/timing.md',

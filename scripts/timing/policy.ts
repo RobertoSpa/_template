@@ -6,8 +6,9 @@ import {
 import { safeDirectionProblems } from '../directions.ts'
 import { type Outcome } from '../gates.ts'
 import { baseRef, onBase } from '../git.ts'
-import { exists, readText, readYaml, today } from '../io.ts'
-import { POLICY_PATHS, readPolicy } from '../policies.ts'
+import { exists, readText, today } from '../io.ts'
+import { POLICY_PATHS } from '../policies.ts'
+import { bundlePathsOf, readRecords } from '../routes.ts'
 import { parseRules, unparsedProblems } from '../rules.ts'
 import {
   gateProblems,
@@ -21,31 +22,6 @@ import assert from 'node:assert'
 import { parse as parseYaml } from 'yaml'
 
 const WORKFLOW_PATH = '.github/workflows/timing.yml'
-const RECORDS_MAX = 1_000
-
-// A routes file with only comments parses as null, and it holds no record.
-export const readRecords = (path: string): RouteRecord[] => {
-  assert(path.endsWith('.yaml'))
-
-  const records = readYaml<null | RouteRecord[]>(path) ?? []
-
-  assert(Array.isArray(records))
-  assert(records.length <= RECORDS_MAX)
-
-  return records
-}
-
-const bundlePathsOf = (): string[] => {
-  const { routes } = readPolicy<{
-    gates: string[]
-    routes: Array<{ path: string }>
-  }>(POLICY_PATHS.bundle)
-
-  assert(Array.isArray(routes))
-  assert(routes.every((route) => typeof route.path === 'string'))
-
-  return routes.map((route) => route.path)
-}
 
 const fileProblems = (policy: Policy): string[] => {
   assert(policy.lab.suite.length > 0)
@@ -100,7 +76,10 @@ export const checkPolicy = (policy: Policy): Outcome => {
     ...numberProblems(policy),
     ...fileProblems(policy),
     ...(exists(policy.routes.file)
-      ? routeRecordProblems(readRecords(policy.routes.file), bundlePathsOf())
+      ? routeRecordProblems(
+          readRecords<RouteRecord>(policy.routes.file),
+          bundlePathsOf(),
+        )
       : []),
     ...(exists(WORKFLOW_PATH)
       ? workflowProblems(readText(WORKFLOW_PATH))
