@@ -4,6 +4,7 @@ import assert from 'node:assert'
 export const POLICY_PATHS = {
   a11y: 'a11y/policy.yaml',
   bundle: 'bundle/policy.yaml',
+  exposure: 'exposure/policy.yaml',
   resilience: 'resilience/policy.yaml',
   security: 'security/policy.yaml',
   timing: 'timing/policy.yaml',

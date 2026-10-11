@@ -1,0 +1,10 @@
+# DANGER: this file turns gitleaks rules off for the served set. A rule that is
+# off here is a secret that ships.
+# Rule OUT-05 in docs/agents/exposure.md. The generic jwt rule is off, because a
+# client bundle ships the anon JSON web token on purpose. Rule DATA-07 decodes
+# the role of each token instead.
+title = "exposure served set"
+
+[extend]
+useDefault = true
+disabledRules = ["jwt"]

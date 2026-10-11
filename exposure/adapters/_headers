@@ -1,0 +1,15 @@
+# DANGER: a generated file. A hand edit is a second copy of the header set.
+# Source: exposure/policy.yaml. Run: pnpm exposure write.
+/*
+  content-security-policy: base-uri 'none'; connect-src 'self'; default-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; require-trusted-types-for 'script'; script-src 'self'; style-src 'self' 'sha256-yqPwOgT8pnnepB+5fnwt6K9Livx5ogF+g236RHGkulk='; upgrade-insecure-requests
+  cross-origin-embedder-policy: require-corp
+  cross-origin-opener-policy: same-origin
+  cross-origin-resource-policy: same-origin
+  permissions-policy: accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()
+  referrer-policy: no-referrer
+  strict-transport-security: max-age=63072000; includeSubDomains; preload
+  x-content-type-options: nosniff
+  x-frame-options: DENY
+  cache-control: no-cache
+/assets/*
+  cache-control: public, max-age=31536000, immutable

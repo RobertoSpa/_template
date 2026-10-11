@@ -1,0 +1,16 @@
+# DANGER: a record here says who may reach a route. A record with the audience
+# public opens the route to the whole internet.
+# One record per route of bundle/policy.yaml. Rule ROUTE-01 in docs/agents/exposure.md.
+#
+# A record has three fields.
+#   path: the route, as the router names it.
+#   audience: public, or a name of routes.audiences in exposure/policy.yaml.
+#   methods: the methods that the route answers. Optional. A record with no
+#     methods gets routes.methods_default.
+#
+# Example of a record:
+#   - path: /account
+#     audience: user
+#     methods: [GET, HEAD, POST]
+- path: /
+  audience: public

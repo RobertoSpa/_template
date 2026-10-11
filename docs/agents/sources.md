@@ -107,3 +107,46 @@ Read this file before you change a rule. Read it also when you must know if the 
 - [MDN, `PerformanceObserver.observe()`](https://developer.mozilla.org/docs/Web/API/PerformanceObserver/observe). The smallest `durationThreshold` that Chrome accepts is 16 ms. Rule LAB-03.
 - [Holzmann, The Power of Ten rules, NASA JPL](https://spinroot.com/gerard/pdf/P10exp.pdf). Rule 2 puts a fixed limit on each loop, and a limit that no tool can prove counts as violated. Rule LAB-01.
 - [NASA GSFC-STD-1000 Rev H](https://standards.nasa.gov/sites/default/files/standards/GSFC/H/0/GSFC-STD-1000RevH_Approved.pdf). A waiver holds for the named elements only. Rule TDEV-01.
+
+## The exposure rules
+
+- [Saltzer and Schroeder, The Protection of Information in Computer Systems, 1975](https://www.cs.virginia.edu/~evans/cs551/saltzer/). Fail-safe defaults, complete mediation, the smallest set of rights, and open design. Rules ROUTE-01, ROUTE-05, and ROUTE-06.
+- [OWASP Top 10:2021, A01 Broken Access Control](https://top10.owasp.org/2021/A01_2021-Broken_Access_Control). Deny by default, and one access control that each request passes. Rule ROUTE-01.
+- [The OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html). A 404 for a resource that the visitor cannot see. Rule ROUTE-03.
+- [Vercel, the postmortem on the Next.js middleware bypass, CVE-2025-29927](https://vercel.com/blog/postmortem-on-next-js-middleware-bypass). One request header skipped the middleware. Rule ROUTE-05.
+- [The header project of OWASP, OSHP](https://owasp.org/www-project-secure-headers/). The list of headers and the value of each one. Rules HDR-05, HDR-06, and HDR-07.
+- [web.dev, strict CSP](https://web.dev/articles/strict-csp). No `'unsafe-inline'`, `object-src 'none'`, `base-uri 'none'`, and a nonce with `'strict-dynamic'` when a server exists. Rule HDR-02.
+- [web.dev, Trusted Types](https://web.dev/articles/trusted-types). `require-trusted-types-for 'script'` stops a script from writing html with a string. Rule HDR-02.
+- [The OWASP cheat sheet on insecure direct object references](https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html). Read the row with the identifier and the caller together. Rule ROUTE-08.
+- [Content Security Policy Level 3](https://www.w3.org/TR/CSP3/). Section 2.2.1, the first of two directives wins. Section 3.3, a `meta` tag drops `frame-ancestors`. Rule HDR-02.
+- [RFC 9110, HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html). Section 5.3, a parser joins two lines of one header name. Rule HDR-01.
+- [The nginx headers module](https://nginx.org/en/docs/http/ngx_http_headers_module.html). `add_header` without `always` drops the header on a 4xx. Rule HDR-01.
+- [The HSTS preload list](https://hstspreload.org/). The three requirements of the header. Rules HDR-03 and HDR-04.
+- [MDN, Cross-Origin-Opener-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy). The two headers that isolate a page together. Rule HDR-05.
+- [The helmet README](https://github.com/helmetjs/helmet). `x-xss-protection: 0`, and `x-powered-by` removed. Rule HDR-07.
+- [The Fetch standard](https://fetch.spec.whatwg.org/). The CORS protocol. A response with no `access-control-allow-origin` is readable by its own origin only. Rule HDR-08.
+- [RFC 8246, HTTP Immutable Responses](https://www.rfc-editor.org/rfc/rfc8246.html). `immutable` is for a URL that changes with its content. Rule HDR-09.
+- [The cookie prefixes, RFC 6265bis](https://datatracker.ietf.org/doc/html/draft-west-cookie-prefixes). The `__Host-` prefix and its four conditions. Rule HDR-10.
+- [RFC 8785, the JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785.html). One canonical form, so that two writers get the same bytes. Rule ESOT-01.
+- [PEP 20, the Zen of Python](https://peps.python.org/pep-0020/). One obvious procedure for each thing. Rule RED-02.
+- [PostgreSQL, Row Security Policies](https://www.postgresql.org/docs/current/ddl-rowsecurity.html). The owner skips the policies until the table is forced, and the superuser skips them always. Rules DATA-02 and DATA-08.
+- [The Supabase database linter](https://supabase.com/docs/guides/database/database-linter). Lints 0010, 0011, and 0024. Rules DATA-03 and DATA-04.
+- [CVE-2025-48757](https://cvemon.intruder.io/cves/CVE-2025-48757). The anon key with no policy exposed 170 projects. Rule DATA-02.
+- [Supabase, the API keys](https://supabase.com/docs/guides/api/api-keys). The secret key skips each policy and does not go to a browser. Rule DATA-07.
+- [Firebase, the unit tests of the security rules](https://firebase.google.com/docs/rules/unit-tests). `unauthenticatedContext` and `assertFails`. Rule DATA-06.
+- [Malwarebytes, 19 million passwords in open Firebase instances, 2024](https://www.malwarebytes.com/blog/privacy/2024/03/19-million-plaintext-passwords-exposed-by-incorrectly-configured-firebase-instances). The scan found 125 million records. Rule DATA-06.
+- [OWASP WSTG-CONF-04, backup files and unreferenced files](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information). Rule OUT-01.
+- [git-dumper](https://github.com/arthaud/git-dumper) and [the scan of 26 million domains for `.env` files](https://hackernoon.com/scanning-26-million-domains-for-exposed-env-files). Rule OUT-02.
+- [Vite, environment variables and modes](https://vite.dev/guide/env-and-mode). Each `VITE_` variable goes into the bundle. Rules OUT-05 and OUT-09.
+- [Subresource Integrity](https://www.w3.org/TR/SRI/). The identity of a file is its hash. Rule OUT-06.
+- [RFC 9116, security.txt](https://www.rfc-editor.org/rfc/rfc9116.html). Section 2.5, the `Contact` and `Expires` fields. Rule OUT-08.
+- [49 CFR 236.5](https://www.ecfr.gov/current/title-49/subtitle-B/chapter-II/part-236/subpart-A/section-236.5). A signal with no power shows the most restrictive aspect. Rule PROBE-01.
+- [The Kemeny report on Three Mile Island, summary](https://cna.ca/wp-content/uploads/2014/05/The-TMI-2-Accident-Its-Impact-Its-Lessons.pdf). The operators read the position of the switch and not the state of the valve. Rule PROBE-02.
+- [The Svalbard seed vault, 2017](https://www.alfalaval.com/media/stories/industries/svalbard-global-seed-vault/). Water got into the entrance tunnel on an assumption that no one tested. Rule PROBE-03.
+- [SAND92-1382, markers for the WIPP waste site, 1993](https://www.sandia.gov/research/publications/details/expert-judgment-on-markers-to-deter-inadvertent-human-intrusion-into-the-wa-1993-11-01/), with [excerpts](https://hex.ooo/library/wipp/). Section 4.1, no active institutional control. The levels of a message. Rules ESOT-05 and ESOT-07.
+- [The principles of the 10,000 Year Clock](https://longnow.org/clock/principles/). Put the manual on the object. Rule ESOT-06.
+- [The tsunami stones of Japan](https://longnow.org/ideas/centuries-old-tsunami-warnings-carved-in-stone/). The danger and the action on one stone. Rule ESOT-08.
+- [ATLS, the trauma protocol](https://en.wikipedia.org/wiki/Advanced_trauma_life_support). The primary survey does the action for what kills first, with no diagnosis before the action. Rule ESOT-08.
+- [FAA AC 120-71B](https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-71B.pdf). The challenge-response checklist. Rule RED-01.
+- [The Google SRE book, chapter 13](https://sre.google/sre-book/emergency-response/) and [chapter 14](https://sre.google/sre-book/managing-incidents/). Get one more person. The person who judges is not the person who changes. Rules RED-03 and RED-04.
+- [SEC Rule 15c3-5](https://www.ecfr.gov/current/title-17/chapter-II/part-240/subpart-A/subject-group-ECFR541343e5c1fa459/section-240.15c3-5). A control in the direct and exclusive control of the owner. Rule ESOT-03.

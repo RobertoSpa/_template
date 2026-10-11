@@ -1,6 +1,6 @@
+import { BUILD_NOT_STARTED_STATUS, viteBuild } from '../build.ts'
 import { type Policy } from './shared.ts'
 import assert from 'node:assert'
-import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import {
   existsSync,
@@ -14,7 +14,6 @@ import { join, relative } from 'node:path'
 
 export type Output = Map<string, Uint8Array>
 
-const VITE = 'node_modules/vite/bin/vite.js'
 const BUILD_BYTES_MAX = 64 * 1_024 * 1_024
 const FILES_MAX = 10_000
 const RUNS = 2
@@ -23,33 +22,14 @@ const build = (policy: Policy, outDirectory: string): string | undefined => {
   assert(outDirectory.length > 0)
   assert(Object.keys(policy.build.env).length > 0)
 
-  const result = spawnSync(
-    process.execPath,
-    [
-      VITE,
-      'build',
-      '--mode',
-      'production',
-      '--outDir',
-      outDirectory,
-      '--emptyOutDir',
-      '--logLevel',
-      'warn',
-    ],
-    {
-      encoding: 'utf8',
-      env: { PATH: process.env.PATH ?? '', ...policy.build.env },
-      maxBuffer: BUILD_BYTES_MAX,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    },
-  )
+  const result = viteBuild(outDirectory, policy.build.env)
 
-  if (result.error !== undefined) {
-    return `vite build did not start: ${result.error.message}. Rule FAIL-01.`
+  if (result.status === BUILD_NOT_STARTED_STATUS) {
+    return `${result.output}. Rule FAIL-01.`
   }
 
   if (result.status !== 0) {
-    return `vite build failed. Rule BLD-04.\n${result.stdout}${result.stderr}`
+    return `vite build failed. Rule BLD-04.\n${result.output}`
   }
 
   return undefined

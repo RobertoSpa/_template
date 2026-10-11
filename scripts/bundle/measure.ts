@@ -15,7 +15,7 @@ type ManifestChunk = {
   src?: string
 }
 
-const HASH = /-[\w-]{8}(\.[a-z\d]+)$/iu
+export const HASH = /-[\w-]{8}(\.[a-z\d]+)$/iu
 const STORE = '/node_modules/.pnpm/'
 const MODULES = '/node_modules/'
 const VIRTUAL = '\0'

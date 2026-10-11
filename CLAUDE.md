@@ -112,6 +112,10 @@ The rules are in `docs/agents/resilience.md`. The numbers are in `resilience/pol
 
 The rules are in `docs/agents/bundle.md`. The numbers are in `bundle/policy.yaml`. The rules put a byte limit on each route, each file, and each branch. The branch that adds a page also adds its record in `routes`. Only `pnpm bundle:write` writes `bundle/sizes.json` or makes a budget smaller. If a rule of that file and the skills `vercel-react-best-practices` or `impeccable` disagree about bundle size, the rule wins.
 
+### Exposure pipeline
+
+The rules are in `docs/agents/exposure.md`. The numbers are in `exposure/policy.yaml`. The rules say what an anonymous visitor gets from a deployed build. The four parts are the access rules of the data layer and the audience of each route. The served set of files and the header set of each response are the other two. The function `headerSetOf` in `scripts/exposure/headers.ts` turns the policy file into the one header set. The preview server, each adapter in `exposure/adapters/`, and the probe read that set. No person edits an adapter. `pnpm exposure write` writes them. Each route of `bundle/policy.yaml` has a record in `exposure/routes.yaml` with its audience. When a gate is red, read the section "When a gate is red" of the rule file before you change a file.
+
 ### Timing pipeline
 
 The rules are in `docs/agents/timing.md`. The numbers are in `timing/policy.yaml`. The rules put a limit on the LCP and the INP of each route, from the median of 5 lab loads. Each route of `bundle/policy.yaml` has a record in `timing/routes.yaml`. A record names the visible text of the control to press in `control`. A record with no control gets the Tab key and a click.
