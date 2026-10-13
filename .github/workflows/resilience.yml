@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  accessibility:
+  resilience:
     name: Resilience gates
     runs-on: ubuntu-latest
     permissions:
